@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Python Solutions — All Topics</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0d1117;
+  --surface: #161b22;
+  --card: #1c2128;
+  --border: #30363d;
+  --text: #e6edf3;
+  --muted: #7d8590;
+  --dim: #b1bac4;
+  --beginner: #3fb950;
+  --easy: #58a6ff;
+  --medium: #d29922;
+  --hard: #f85149;
+  --expert: #bc8cff;
+  --code-bg: #0d1117;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--text); font-family:'Outfit',sans-serif; }
+
+/* Sidebar */
+#sidebar {
+  position:fixed; left:0; top:0; bottom:0; width:240px;
+  background:var(--surface); border-right:1px solid var(--border);
+  z-index:100; overflow-y:auto; display:flex; flex-direction:column;
+}
+.sb-logo {
+  padding:20px 18px 14px;
+  border-bottom:1px solid var(--border);
+}
+.sb-logo-top { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--beginner); letter-spacing:1px; margin-bottom:4px; }
+.sb-logo-title { font-size:1rem; font-weight:800; color:var(--text); }
+.sb-logo-sub { font-size:11px; color:var(--muted); margin-top:2px; }
+
+.sb-nav { flex:1; padding:8px; }
+.sb-item {
+  display:flex; align-items:center; gap:10px;
+  padding:9px 10px; border-radius:6px; cursor:pointer;
+  transition:all 0.15s; margin-bottom:2px;
+}
+.sb-item:hover { background:rgba(255,255,255,0.05); }
+.sb-item.active { background:rgba(63,185,80,0.1); }
+.sb-item.active .sb-name { color:var(--beginner); }
+.sb-icon { font-size:16px; min-width:20px; }
+.sb-name { font-size:12px; font-weight:600; color:var(--muted); }
+.sb-count { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--muted); margin-top:1px; }
+
+/* Main */
+#main { margin-left:240px; min-height:100vh; }
+
+.top-bar {
+  position:sticky; top:0;
+  background:rgba(13,17,23,0.92); backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--border);
+  padding:14px 32px; display:flex; align-items:center; justify-content:space-between;
+  z-index:50;
+}
+.top-bar-title { font-size:1.1rem; font-weight:700; }
+.top-bar-sub { font-size:12px; color:var(--muted); font-family:'JetBrains Mono',monospace; margin-top:2px; }
+
+.filter-row { display:flex; gap:6px; flex-wrap:wrap; }
+.fbtn {
+  font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700;
+  padding:4px 11px; border-radius:5px; border:1px solid var(--border);
+  background:transparent; cursor:pointer; transition:all 0.15s; letter-spacing:0.5px;
+}
+.fbtn.all { color:var(--dim); }
+.fbtn.all.on, .fbtn.all:hover { border-color:var(--dim); color:var(--text); background:rgba(177,186,196,0.1); }
+.fbtn.fb { color:var(--beginner); }
+.fbtn.fb.on { border-color:var(--beginner); background:rgba(63,185,80,0.1); }
+.fbtn.fe { color:var(--easy); }
+.fbtn.fe.on { border-color:var(--easy); background:rgba(88,166,255,0.1); }
+.fbtn.fm { color:var(--medium); }
+.fbtn.fm.on { border-color:var(--medium); background:rgba(210,153,34,0.1); }
+.fbtn.fh { color:var(--hard); }
+.fbtn.fh.on { border-color:var(--hard); background:rgba(248,81,73,0.1); }
+.fbtn.fx { color:var(--expert); }
+.fbtn.fx.on { border-color:var(--expert); background:rgba(188,140,255,0.1); }
+
+.content { padding:28px 32px; max-width:920px; }
+
+/* Solution Card */
+.sol-card {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:12px; margin-bottom:14px; overflow:hidden;
+  transition:border-color 0.2s;
+}
+.sol-card:hover { border-color:#444d56; }
+.sol-card[data-diff="beginner"] { border-left:3px solid var(--beginner); }
+.sol-card[data-diff="easy"] { border-left:3px solid var(--easy); }
+.sol-card[data-diff="medium"] { border-left:3px solid var(--medium); }
+.sol-card[data-diff="hard"] { border-left:3px solid var(--hard); }
+.sol-card[data-diff="expert"] { border-left:3px solid var(--expert); }
+
+.sol-header {
+  display:flex; align-items:flex-start; gap:14px;
+  padding:16px 20px; cursor:pointer; user-select:none;
+}
+.sol-num {
+  font-family:'JetBrains Mono',monospace; font-size:11px;
+  color:var(--muted); min-width:32px; padding-top:2px;
+}
+.sol-info { flex:1; }
+.sol-title { font-size:0.95rem; font-weight:700; color:var(--text); margin-bottom:4px; }
+.sol-desc { font-size:0.83rem; color:var(--muted); line-height:1.5; }
+.sol-right { display:flex; flex-direction:column; align-items:flex-end; gap:6px; }
+.diff-pill {
+  font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700;
+  padding:3px 9px; border-radius:4px; letter-spacing:0.5px;
+}
+.dp-beginner { color:var(--beginner); background:rgba(63,185,80,0.12); border:1px solid rgba(63,185,80,0.3); }
+.dp-easy { color:var(--easy); background:rgba(88,166,255,0.12); border:1px solid rgba(88,166,255,0.3); }
+.dp-medium { color:var(--medium); background:rgba(210,153,34,0.12); border:1px solid rgba(210,153,34,0.3); }
+.dp-hard { color:var(--hard); background:rgba(248,81,73,0.12); border:1px solid rgba(248,81,73,0.3); }
+.dp-expert { color:var(--expert); background:rgba(188,140,255,0.12); border:1px solid rgba(188,140,255,0.3); }
+
+.chevron { color:var(--muted); font-size:14px; transition:transform 0.2s; padding-top:2px; }
+.sol-card.open .chevron { transform:rotate(180deg); }
+
+/* Body */
+.sol-body { display:none; border-top:1px solid var(--border); }
+.sol-card.open .sol-body { display:block; }
+
+.sol-inner { padding:20px 20px 20px 66px; display:grid; gap:14px; }
+
+.sec-label {
+  font-family:'JetBrains Mono',monospace; font-size:10px;
+  color:var(--muted); letter-spacing:1.5px; text-transform:uppercase;
+  margin-bottom:8px;
+}
+
+/* Code block */
+.code-wrap { position:relative; }
+.code-block {
+  background:var(--code-bg); border:1px solid var(--border);
+  border-radius:8px; padding:16px 18px;
+  font-family:'JetBrains Mono',monospace; font-size:0.82rem;
+  line-height:1.9; overflow-x:auto; white-space:pre;
+  color:#e6edf3;
+}
+.copy-btn {
+  position:absolute; top:8px; right:10px;
+  font-family:'JetBrains Mono',monospace; font-size:10px;
+  padding:4px 10px; border-radius:5px;
+  background:var(--surface); border:1px solid var(--border);
+  color:var(--muted); cursor:pointer; transition:all 0.15s;
+}
+.copy-btn:hover { color:var(--text); border-color:#555; }
+.copy-btn.copied { color:var(--beginner); border-color:var(--beginner); }
+
+.output-box {
+  background:rgba(63,185,80,0.05); border:1px solid rgba(63,185,80,0.2);
+  border-radius:8px; padding:12px 16px;
+  font-family:'JetBrains Mono',monospace; font-size:0.8rem;
+  line-height:1.8; color:#7ee787; white-space:pre-wrap;
+}
+
+.explain-box {
+  background:rgba(88,166,255,0.05); border:1px solid rgba(88,166,255,0.15);
+  border-radius:8px; padding:14px 16px;
+  font-size:0.87rem; color:#93c5fd; line-height:1.8;
+}
+
+/* Syntax highlighting */
+.kw { color:#ff7b72; }
+.fn { color:#d2a8ff; }
+.st { color:#a5d6ff; }
+.cm { color:#8b949e; font-style:italic; }
+.nm { color:#79c0ff; }
+.op { color:#ff7b72; }
+.bi { color:#ffa657; }
+
+/* Section header */
+.diff-section-hdr {
+  display:flex; align-items:center; gap:12px;
+  padding:10px 0 12px; margin-bottom:12px;
+  border-bottom:1px solid var(--border);
+}
+.diff-section-hdr-label {
+  font-size:13px; font-weight:700;
+  font-family:'JetBrains Mono',monospace; letter-spacing:0.5px;
+}
+.diff-section-hdr-line { flex:1; height:1px; background:var(--border); }
+
+/* Scrollbar */
+::-webkit-scrollbar { width:4px; height:4px; }
+::-webkit-scrollbar-thumb { background:var(--border); border-radius:99px; }
+
+@media(max-width:768px) {
+  #sidebar { display:none; }
+  #main { margin-left:0; }
+  .content { padding:16px; }
+  .top-bar { padding:12px 16px; flex-direction:column; align-items:flex-start; gap:10px; }
+  .sol-inner { padding:14px; }
+}
+</style>
+</head>
+<body>
+
+<div id="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-top">🐍 SOLUTIONS</div>
+    <div class="sb-logo-title">Python 0→Hero</div>
+    <div class="sb-logo-sub">All solutions with explanation</div>
+  </div>
+  <div class="sb-nav" id="sbNav"></div>
+</div>
+
+<div id="main">
+  <div class="top-bar">
+    <div>
+      <div class="top-bar-title" id="topTitle">Variables & Input/Output</div>
+      <div class="top-bar-sub" id="topSub">Click a question to see the solution</div>
+    </div>
+    <div class="filter-row">
+      <button class="fbtn all on" onclick="setFilter('all')">ALL</button>
+      <button class="fbtn fb" onclick="setFilter('beginner')">🟢</button>
+      <button class="fbtn fe" onclick="setFilter('easy')">🔵</button>
+      <button class="fbtn fm" onclick="setFilter('medium')">🟡</button>
+      <button class="fbtn fh" onclick="setFilter('hard')">🔴</button>
+      <button class="fbtn fx" onclick="setFilter('expert')">⚫</button>
+    </div>
+  </div>
+  <div class="content" id="content"></div>
+</div>
+
+<script>
+const hl = s => s
+  .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+const TOPICS = [
+{
+  icon:"🖨️", name:"Variables & I/O",
+  solutions:[
+    { diff:"beginner", title:"Say Hello",
+      code:`print("Hello, World!")`,
+      output:`Hello, World!`,
+      explain:`print() is the most basic Python function. It prints whatever is inside the quotes to the screen.` },
+    { diff:"beginner", title:"Print Your Name",
+      code:`name = "Rahul"\nprint(f"My name is {name}")`,
+      output:`My name is Rahul`,
+      explain:`We store text in a variable using = sign. f-string (f"...") lets us put variables directly inside the string using {}.` },
+    { diff:"beginner", title:"Integer Variables",
+      code:`a = 10\nb = 3\nprint("Sum:", a + b)       # 13\nprint("Difference:", a - b)  # 7\nprint("Product:", a * b)     # 30\nprint("Quotient:", a / b)    # 3.333...`,
+      output:`Sum: 13\nDifference: 7\nProduct: 30\nQuotient: 3.3333333333333335`,
+      explain:`Basic arithmetic operators: + add, - subtract, * multiply, / divide. Division always gives float.` },
+    { diff:"beginner", title:"Type Detective",
+      code:`a = 10\nb = 3.14\nc = "Hello"\nd = True\nprint(type(a))  # int\nprint(type(b))  # float\nprint(type(c))  # str\nprint(type(d))  # bool`,
+      output:`<class 'int'>\n<class 'float'>\n<class 'str'>\n<class 'bool'>`,
+      explain:`type() tells you what kind of data is stored in a variable. 4 basic types: int (whole numbers), float (decimals), str (text), bool (True/False).` },
+    { diff:"beginner", title:"User Input",
+      code:`name = input("Enter your name: ")\nage = input("Enter your age: ")\nprint(f"Hello {name}, you are {age} years old!")`,
+      output:`Enter your name: Priya\nEnter your age: 21\nHello Priya, you are 21 years old!`,
+      explain:`input() waits for user to type something. It ALWAYS returns a string. We use f-string to combine variables in the output.` },
+    { diff:"easy", title:"Simple Calculator",
+      code:`a = int(input("Enter first number: "))\nb = int(input("Enter second number: "))\nprint(f"Sum: {a + b}")\nprint(f"Difference: {a - b}")\nprint(f"Product: {a * b}")\nprint(f"Floor Division: {a // b}")`,
+      output:`Enter first number: 15\nEnter second number: 4\nSum: 19\nDifference: 11\nProduct: 60\nFloor Division: 3`,
+      explain:`int() converts the string from input() to an integer. Without int(), you can't do math. // is floor division — gives integer result without decimal.` },
+    { diff:"easy", title:"Area of Rectangle",
+      code:`length = float(input("Enter length: "))\nwidth = float(input("Enter width: "))\narea = length * width\nperimeter = 2 * (length + width)\nprint(f"Area: {area}")\nprint(f"Perimeter: {perimeter}")`,
+      output:`Enter length: 5\nEnter width: 3\nArea: 15.0\nPerimeter: 16.0`,
+      explain:`Area = l × w. Perimeter = 2 × (l + w). We use float() to allow decimal inputs.` },
+    { diff:"easy", title:"Temperature Converter",
+      code:`c = float(input("Enter temperature in Celsius: "))\nf = (c * 9/5) + 32\nprint(f"{c}°C = {f}°F")`,
+      output:`Enter temperature in Celsius: 100\n100.0°C = 212.0°F`,
+      explain:`Formula: F = (C × 9/5) + 32. Multiply by 9/5 first, then add 32. 100°C = 212°F is boiling point — good check!` },
+    { diff:"easy", title:"Swap Variables",
+      code:`a = 5\nb = 10\nprint(f"Before: a={a}, b={b}")\na, b = b, a  # Python magic — tuple swap!\nprint(f"After:  a={a}, b={b}")`,
+      output:`Before: a=5, b=10\nAfter:  a=10, b=5`,
+      explain:`Python's tuple unpacking: a, b = b, a evaluates the right side first (b=10, a=5), then assigns both at once. No temporary variable needed!` },
+    { diff:"medium", title:"Distance & Speed",
+      code:`d = float(input("Enter distance (km): "))\nt = float(input("Enter time (hours): "))\nspeed = d / t\ntime_for_500 = 500 / speed\nprint(f"Speed: {speed} km/h")\nprint(f"Time to cover 500km: {time_for_500} hours")`,
+      output:`Enter distance (km): 300\nEnter time (hours): 3\nSpeed: 100.0 km/h\nTime to cover 500km: 5.0 hours`,
+      explain:`Speed = Distance ÷ Time. Then to find time for 500km: Time = Distance ÷ Speed = 500 ÷ speed.` },
+    { diff:"medium", title:"Circle Stats",
+      code:`import math\nr = float(input("Enter radius: "))\narea = math.pi * r * r\ncircumference = 2 * math.pi * r\ndiameter = 2 * r\nprint(f"Area: {round(area, 2)}")\nprint(f"Circumference: {round(circumference, 2)}")\nprint(f"Diameter: {diameter}")`,
+      output:`Enter radius: 7\nArea: 153.94\nCircumference: 43.98\nDiameter: 14.0`,
+      explain:`import math gives us math.pi (= 3.14159...). round(x, 2) rounds to 2 decimal places.` },
+    { diff:"medium", title:"Bill Splitter",
+      code:`bill = float(input("Enter bill amount: "))\ntax = float(input("Enter tax percentage: "))\npeople = int(input("Enter number of people: "))\ntax_amount = bill * tax / 100\ntotal = bill + tax_amount\neach_person = total / people\nprint(f"Tax Amount: {tax_amount}")\nprint(f"Total with Tax: {total}")\nprint(f"Each person pays: {each_person}")`,
+      output:`Enter bill amount: 1000\nEnter tax percentage: 18\nEnter number of people: 4\nTax Amount: 180.0\nTotal with Tax: 1180.0\nEach person pays: 295.0`,
+      explain:`3 steps: 1) Calculate tax = bill × tax% ÷ 100. 2) Add tax to bill. 3) Divide by number of people.` },
+  ]
+},
+{
+  icon:"⚖️", name:"Operators & Math",
+  solutions:[
+    { diff:"beginner", title:"Even or Odd",
+      code:`n = int(input("Enter a number: "))\nif n % 2 == 0:\n    print("Even")\nelse:\n    print("Odd")`,
+      output:`Input: 7 → Odd\nInput: 4 → Even`,
+      explain:`% (modulo) gives remainder. Any even number divided by 2 has remainder 0. If n%2==0 → Even, else → Odd.` },
+    { diff:"beginner", title:"Last Digit",
+      code:`n = int(input("Enter a number: "))\nlast_digit = n % 10\nprint(f"Last digit of {n} is: {last_digit}")`,
+      output:`Input: 1234 → Last digit: 4\nInput: 9870 → Last digit: 0`,
+      explain:`n % 10 always gives the last digit. Why? Because when you divide by 10, the remainder is exactly the last digit. 1234 ÷ 10 = 123 remainder 4.` },
+    { diff:"beginner", title:"Integer Division",
+      code:`chocolates = 17\nchildren = 5\neach_gets = chocolates // children   # 3\nleft_over = chocolates % children    # 2\nprint(f"Each child gets: {each_gets}")\nprint(f"Chocolates left: {left_over}")`,
+      output:`Each child gets: 3\nChocolates left: 2`,
+      explain:`// is floor division (drops decimal). % gives remainder. 17 ÷ 5 = 3 remainder 2.` },
+    { diff:"easy", title:"Digit Sum",
+      code:`n = int(input("Enter a 3-digit number: "))\nhundreds = n // 100\ntens = (n // 10) % 10\nones = n % 10\ntotal = hundreds + tens + ones\nprint(f"Digits: {hundreds} + {tens} + {ones} = {total}")`,
+      output:`Input: 357 → Digits: 3 + 5 + 7 = 15`,
+      explain:`Extract hundreds with n//100. Extract tens with (n//10)%10. Extract ones with n%10. Then add all three.` },
+    { diff:"easy", title:"Power Without pow()",
+      code:`a = int(input("Enter base: "))\nb = int(input("Enter exponent: "))\nresult = 1\nfor i in range(b):\n    result = result * a\nprint(f"{a}^{b} = {result}")`,
+      output:`Enter base: 2\nEnter exponent: 8\n2^8 = 256`,
+      explain:`Start with result=1. Multiply by 'a' exactly 'b' times in a loop. Like doing 2×2×2×2×2×2×2×2 (8 times) = 256.` },
+    { diff:"easy", title:"Absolute Value",
+      code:`n = int(input("Enter a number: "))\nif n < 0:\n    n = -n\nprint(f"Absolute value: {n}")`,
+      output:`Input: -7 → 7\nInput: 5 → 5`,
+      explain:`If number is negative, multiply by -1 to make it positive. Positive numbers stay as they are.` },
+    { diff:"easy", title:"Max of Three",
+      code:`a = int(input("Enter first: "))\nb = int(input("Enter second: "))\nc = int(input("Enter third: "))\nlargest = a\nif b > largest:\n    largest = b\nif c > largest:\n    largest = c\nprint(f"Largest: {largest}")`,
+      output:`Input: 4 9 2 → Largest: 9`,
+      explain:`Start assuming 'a' is the largest. Check if 'b' is bigger → update. Check if 'c' is bigger → update. Final value is the largest.` },
+    { diff:"medium", title:"Reverse a Number",
+      code:`n = int(input("Enter a number: "))\noriginal = n\nrev = 0\nwhile n > 0:\n    last_digit = n % 10    # extract last digit\n    rev = rev * 10 + last_digit  # add to reversed\n    n = n // 10            # remove last digit\nprint(f"Reverse of {original} is {rev}")`,
+      output:`Input: 12345 → Reverse: 54321`,
+      explain:`Extract last digit with %10. Build reversed number (shift left by ×10 then add digit). Remove last digit with //10. Repeat until n=0.` },
+    { diff:"medium", title:"Palindrome Number",
+      code:`n = int(input("Enter a number: "))\noriginal = n\nrev = 0\nwhile n > 0:\n    rev = rev * 10 + n % 10\n    n //= 10\nif rev == original:\n    print("Palindrome ✓")\nelse:\n    print("Not a Palindrome ✗")`,
+      output:`Input: 121 → Palindrome ✓\nInput: 123 → Not a Palindrome ✗`,
+      explain:`Reverse the number using the same logic as above. If reversed number equals original → it's a palindrome.` },
+    { diff:"medium", title:"Armstrong Number",
+      code:`n = int(input("Enter a number: "))\noriginal = n\nnum_digits = len(str(n))\ntotal = 0\nwhile n > 0:\n    digit = n % 10\n    total += digit ** num_digits\n    n //= 10\nif total == original:\n    print(f"{original} is an Armstrong number ✓")\nelse:\n    print(f"{original} is NOT an Armstrong number ✗")`,
+      output:`Input: 153 → 153 is an Armstrong number ✓\nInput: 123 → 123 is NOT an Armstrong number ✗`,
+      explain:`153 = 1³+5³+3³ = 1+125+27 = 153. Count digits first. Then extract each digit and raise to power of digit count. Sum = original → Armstrong.` },
+    { diff:"hard", title:"GCD (Euclidean)",
+      code:`a = int(input("Enter first number: "))\nb = int(input("Enter second number: "))\nwhile b != 0:\n    a, b = b, a % b  # Euclidean algorithm\nprint(f"GCD: {a}")`,
+      output:`Input: 48 18 → GCD: 6`,
+      explain:`Euclidean algorithm: gcd(48,18) → gcd(18,12) → gcd(12,6) → gcd(6,0) → answer is 6. Keep replacing (a,b) with (b, a%b) until b=0.` },
+    { diff:"hard", title:"LCM Using GCD",
+      code:`a = int(input("Enter first: "))\nb = int(input("Enter second: "))\n# First find GCD\nx, y = a, b\nwhile y != 0:\n    x, y = y, x % y\ngcd = x\n# LCM formula\nlcm = (a * b) // gcd\nprint(f"GCD: {gcd}")\nprint(f"LCM: {lcm}")`,
+      output:`Input: 4 6 → GCD: 2, LCM: 12`,
+      explain:`LCM(a,b) = (a×b) ÷ GCD(a,b). First compute GCD using Euclidean algorithm, then apply the formula.` },
+    { diff:"expert", title:"Digits in One Pass",
+      code:`n = int(input("Enter a number: "))\ncount = 0\ntotal = 0\nproduct = 1\nwhile n > 0:\n    digit = n % 10\n    count += 1\n    total += digit\n    product *= digit\n    n //= 10\nprint(f"Count: {count}, Sum: {total}, Product: {product}")`,
+      output:`Input: 2345 → Count: 4, Sum: 14, Product: 120`,
+      explain:`One loop does everything at once! Each iteration: extract digit, increment count, add to sum, multiply to product, then remove digit.` },
+  ]
+},
+{
+  icon:"🔀", name:"Conditionals",
+  solutions:[
+    { diff:"beginner", title:"Positive, Negative, Zero",
+      code:`n = int(input("Enter a number: "))\nif n > 0:\n    print("Positive")\nelif n < 0:\n    print("Negative")\nelse:\n    print("Zero")`,
+      output:`Input: -5 → Negative\nInput: 0 → Zero\nInput: 7 → Positive`,
+      explain:`Three possible cases. if checks first. elif (else if) checks if first was False. else catches everything remaining.` },
+    { diff:"beginner", title:"Voting Eligibility",
+      code:`age = int(input("Enter your age: "))\nif age >= 18:\n    print("You can vote ✓")\nelse:\n    print("Too young to vote ✗")`,
+      output:`Input: 16 → Too young\nInput: 20 → You can vote ✓`,
+      explain:`Simple if-else. >= means "greater than OR equal to". Age 18 or more → can vote.` },
+    { diff:"beginner", title:"Pass or Fail",
+      code:`marks = int(input("Enter marks (0-100): "))\npercentage = marks\nif marks >= 40:\n    print(f"Result: Pass ✓ | {percentage}%")\nelse:\n    print(f"Result: Fail ✗ | {percentage}%")`,
+      output:`Input: 35 → Fail ✗ | 35%\nInput: 72 → Pass ✓ | 72%`,
+      explain:`40 is the passing mark. >= 40 means 40 and above passes. Since marks are out of 100, marks = percentage directly.` },
+    { diff:"easy", title:"Grade Calculator",
+      code:`marks = int(input("Enter marks: "))\nif marks >= 90:\n    grade = "A"\nelif marks >= 80:\n    grade = "B"\nelif marks >= 70:\n    grade = "C"\nelif marks >= 60:\n    grade = "D"\nelif marks >= 50:\n    grade = "E"\nelse:\n    grade = "F"\nprint(f"Grade: {grade}")`,
+      output:`Input: 82 → Grade: B\nInput: 45 → Grade: F`,
+      explain:`Check from HIGHEST to LOWEST. Once a condition is True, rest are skipped. If we checked lowest first, everyone would get F!` },
+    { diff:"easy", title:"Biggest of Three",
+      code:`a = int(input("First: "))\nb = int(input("Second: "))\nc = int(input("Third: "))\nif a >= b and a >= c:\n    print(f"Largest: {a}")\nelif b >= c:\n    print(f"Largest: {b}")\nelse:\n    print(f"Largest: {c}")`,
+      output:`Input: 10 25 7 → Largest: 25`,
+      explain:`Check if a is >= both others. If not, check if b >= c. Otherwise c is largest. Use 'and' to check two conditions at once.` },
+    { diff:"easy", title:"Leap Year",
+      code:`year = int(input("Enter year: "))\nif (year % 4 == 0 and year % 100 != 0) or (year % 400 == 0):\n    print(f"{year} is a Leap Year ✓")\nelse:\n    print(f"{year} is NOT a Leap Year ✗")`,
+      output:`2000 → Leap Year ✓\n1900 → NOT a Leap Year ✗\n2024 → Leap Year ✓`,
+      explain:`Leap year rule: divisible by 4 BUT NOT 100, OR divisible by 400. 2000 is leap (÷400). 1900 not leap (÷100 but not ÷400).` },
+    { diff:"easy", title:"Triangle Valid?",
+      code:`a = int(input("Side 1: "))\nb = int(input("Side 2: "))\nc = int(input("Side 3: "))\nif a + b > c and b + c > a and a + c > b:\n    print("Valid Triangle ✓")\nelse:\n    print("Invalid Triangle ✗")`,
+      output:`3 4 5 → Valid Triangle ✓\n1 2 10 → Invalid Triangle ✗`,
+      explain:`Triangle inequality: sum of any TWO sides must be greater than the THIRD side. All 3 conditions must be true (use 'and').` },
+    { diff:"medium", title:"BMI Calculator",
+      code:`weight = float(input("Weight (kg): "))\nheight = float(input("Height (m): "))\nbmi = weight / (height ** 2)\nprint(f"BMI: {round(bmi, 2)}")\nif bmi < 18.5:\n    print("Category: Underweight")\nelif bmi < 25:\n    print("Category: Normal weight")\nelif bmi < 30:\n    print("Category: Overweight")\nelse:\n    print("Category: Obese")`,
+      output:`70kg 1.75m → BMI: 22.86 → Normal weight`,
+      explain:`BMI = weight ÷ height². height**2 means height squared. Then use if/elif to categorize.` },
+    { diff:"medium", title:"Electricity Bill",
+      code:`units = int(input("Enter units used: "))\nbill = 0\nif units <= 100:\n    bill = units * 1.5\nelif units <= 200:\n    bill = 100 * 1.5 + (units - 100) * 2.5\nelif units <= 300:\n    bill = 100*1.5 + 100*2.5 + (units-200) * 4\nelse:\n    bill = 100*1.5 + 100*2.5 + 100*4 + (units-300) * 6\nprint(f"Electricity Bill: ₹{bill}")`,
+      output:`250 units → ₹775.0\n(100×1.5 + 100×2.5 + 50×4 = 150+250+200+175=775)`,
+      explain:`SLAB billing: First 100 units ALWAYS at ₹1.5, next 100 at ₹2.5, etc. Don't multiply ALL units by one rate!` },
+    { diff:"medium", title:"Calculator with Operation",
+      code:`a = float(input("Enter first number: "))\nop = input("Enter operator (+,-,*,/,%): ")\nb = float(input("Enter second number: "))\nif op == "+":\n    print(f"Result: {a + b}")\nelif op == "-":\n    print(f"Result: {a - b}")\nelif op == "*":\n    print(f"Result: {a * b}")\nelif op == "/":\n    if b == 0:\n        print("Error: Cannot divide by zero!")\n    else:\n        print(f"Result: {a / b}")\nelif op == "%":\n    print(f"Result: {a % b}")\nelse:\n    print("Invalid operator!")`,
+      output:`10 / 0 → Error: Cannot divide by zero!\n10 + 5 → Result: 15.0`,
+      explain:`Use if/elif for each operator. Special case: check b==0 BEFORE dividing. Always handle edge cases!` },
+    { diff:"hard", title:"Rock Paper Scissors",
+      code:`p1 = input("Player 1 (rock/paper/scissors): ").lower()\np2 = input("Player 2 (rock/paper/scissors): ").lower()\nvalid = ["rock", "paper", "scissors"]\nif p1 not in valid or p2 not in valid:\n    print("Invalid input!")\nelif p1 == p2:\n    print("It's a Tie!")\nelif (p1=="rock" and p2=="scissors") or \\\n     (p1=="scissors" and p2=="paper") or \\\n     (p1=="paper" and p2=="rock"):\n    print("Player 1 Wins! 🏆")\nelse:\n    print("Player 2 Wins! 🏆")`,
+      output:`rock vs scissors → Player 1 Wins!\nrock vs rock → Tie!`,
+      explain:`.lower() converts input to lowercase (handles ROCK, Rock etc). Check tie first, then P1 win conditions. If neither → P2 wins.` },
+    { diff:"hard", title:"Income Tax",
+      code:`income = float(input("Enter annual income (₹): "))\ntax = 0\nif income <= 250000:\n    tax = 0\nelif income <= 500000:\n    tax = (income - 250000) * 0.05\nelif income <= 1000000:\n    tax = 250000*0.05 + (income-500000) * 0.20\nelse:\n    tax = 250000*0.05 + 500000*0.20 + (income-1000000)*0.30\nprint(f"Income: ₹{income:,.0f}")\nprint(f"Tax: ₹{tax:,.0f}")`,
+      output:`₹7,00,000 → Tax: ₹52,500`,
+      explain:`Cumulative slabs! First 2.5L: 0%. Next 2.5L at 5% = ₹12,500. Next 2L (5L to 7L) at 20% = ₹40,000. Total = ₹52,500.` },
+    { diff:"expert", title:"Login System",
+      code:`USERNAME = "admin"\nPASSWORD = "pass123"\nattempts = 3\nwhile attempts > 0:\n    user = input("Username: ")\n    pwd = input("Password: ")\n    if user == USERNAME and pwd == PASSWORD:\n        print("Login Successful! ✓")\n        break\n    else:\n        attempts -= 1\n        if attempts > 0:\n            print(f"Wrong! {attempts} attempt(s) left.")\n        else:\n            print("Account LOCKED! Too many failed attempts. 🔒")`,
+      output:`Wrong password → 2 attempts left → Wrong → 1 left → Wrong → LOCKED 🔒`,
+      explain:`while loop keeps running. attempts-=1 reduces count. break exits loop on success. When attempts=0, account is locked.` },
+  ]
+},
+{
+  icon:"🔁", name:"Loops",
+  solutions:[
+    { diff:"beginner", title:"Count to N",
+      code:`n = int(input("Enter N: "))\nfor i in range(1, n + 1):\n    print(i, end=" ")\nprint()  # new line at end`,
+      output:`Input: 5 → 1 2 3 4 5`,
+      explain:`range(1, n+1) generates numbers from 1 to n inclusive. end=" " prints space instead of newline after each number.` },
+    { diff:"beginner", title:"Multiplication Table",
+      code:`n = int(input("Enter number: "))\nfor i in range(1, 11):\n    print(f"{n} × {i} = {n * i}")`,
+      output:`7 × 1 = 7\n7 × 2 = 14\n...\n7 × 10 = 70`,
+      explain:`Loop i from 1 to 10. Multiply n by i each time. range(1,11) gives 1,2,3,...,10.` },
+    { diff:"beginner", title:"Sum 1 to N",
+      code:`n = int(input("Enter N: "))\ntotal = 0\nfor i in range(1, n + 1):\n    total += i  # same as total = total + i\nprint(f"Sum of 1 to {n} = {total}")`,
+      output:`Input: 100 → Sum = 5050`,
+      explain:`Accumulator pattern. Start total=0. Each loop adds current i to total. This is the most important loop pattern!` },
+    { diff:"beginner", title:"Countdown",
+      code:`n = int(input("Enter N: "))\nfor i in range(n, 0, -1):  # third arg = step!\n    print(i, end=" ")\nprint("Blast off! 🚀")`,
+      output:`5 4 3 2 1 Blast off! 🚀`,
+      explain:`range(n, 0, -1) counts DOWN. Third argument is the step (-1 means subtract 1 each time). Goes from n to 1 (not including 0).` },
+    { diff:"easy", title:"Factorial",
+      code:`n = int(input("Enter n: "))\nresult = 1\nfor i in range(1, n + 1):\n    result *= i  # result = result * i\nprint(f"{n}! = {result}")`,
+      output:`5! = 120\n0! = 1`,
+      explain:`Start result=1 (NOT 0, because 0×anything=0!). Multiply by each number 1,2,3,...,n. 5! = 1×2×3×4×5 = 120.` },
+    { diff:"easy", title:"Fibonacci Series",
+      code:`n = int(input("How many terms: "))\na, b = 0, 1\nfor i in range(n):\n    print(a, end=" ")\n    a, b = b, a + b  # both update at same time!`,
+      output:`8 terms → 0 1 1 2 3 5 8 13`,
+      explain:`a,b = b, a+b is the key: a gets b's value, b gets a+b. Both happen simultaneously. Start: 0,1 → 1,1 → 1,2 → 2,3...` },
+    { diff:"easy", title:"Count Digits",
+      code:`n = int(input("Enter a number: "))\nif n == 0:\n    print("Digits: 1")\nelse:\n    count = 0\n    while n > 0:\n        n //= 10  # remove last digit\n        count += 1\n    print(f"Digits: {count}")`,
+      output:`12345 → 5 digits\n1000000 → 7 digits`,
+      explain:`Keep dividing by 10 (removes last digit) and count how many times. 12345→1234→123→12→1→0. That's 5 divisions = 5 digits.` },
+    { diff:"easy", title:"Sum Even / Odd",
+      code:`n = int(input("How many numbers: "))\neven_sum = 0\nodd_sum = 0\nfor i in range(n):\n    num = int(input(f"Enter number {i+1}: "))\n    if num % 2 == 0:\n        even_sum += num\n    else:\n        odd_sum += num\nprint(f"Even sum: {even_sum}")\nprint(f"Odd sum: {odd_sum}")`,
+      output:`5 numbers: 1,2,3,4,5 → Even: 6, Odd: 9`,
+      explain:`Two accumulators: even_sum and odd_sum. Inside loop, check if number is even or odd, add to correct accumulator.` },
+    { diff:"medium", title:"Star Triangle",
+      code:`n = int(input("Enter rows: "))\nfor i in range(1, n + 1):\n    print("*" * i)`,
+      output:`*\n**\n***\n****\n*****`,
+      explain:`"*" * i repeats star i times. Row 1: "*"×1, Row 2: "*"×2, etc. String multiplication is a Python superpower!` },
+    { diff:"medium", title:"Number Pyramid",
+      code:`n = int(input("Enter rows: "))\nfor i in range(1, n + 1):\n    spaces = " " * (n - i)\n    # ascending then descending\n    row = ""\n    for j in range(1, i + 1):\n        row += str(j) + " "\n    for j in range(i - 1, 0, -1):\n        row += str(j) + " "\n    print(spaces + row)`,
+      output:`    1\n   1 2 1\n  1 2 3 2 1\n 1 2 3 4 3 2 1`,
+      explain:`For each row i: print numbers 1 to i (ascending), then i-1 down to 1 (descending). Add spaces before for centering.` },
+    { diff:"medium", title:"Prime Numbers to N",
+      code:`n = int(input("Find primes up to: "))\nfor num in range(2, n + 1):\n    is_prime = True\n    for i in range(2, num):\n        if num % i == 0:\n            is_prime = False\n            break  # no need to check further\n    if is_prime:\n        print(num, end=" ")`,
+      output:`Primes up to 20 → 2 3 5 7 11 13 17 19`,
+      explain:`For each number, check if anything divides it. If any divisor found → not prime. break exits inner loop early (optimization).` },
+    { diff:"medium", title:"Guess the Number",
+      code:`secret = 42\nattempts = 0\nprint("Guess the number between 1 and 100!")\nwhile True:\n    guess = int(input("Your guess: "))\n    attempts += 1\n    if guess == secret:\n        print(f"Correct! 🎉 You got it in {attempts} attempts!")\n        break\n    elif guess > secret:\n        print("Too high! Try lower.")\n    else:\n        print("Too low! Try higher.")`,
+      output:`Guess:50→Too high | Guess:30→Too low | Guess:42→Correct! 3 attempts`,
+      explain:`while True runs forever. break exits when correct guess. Count attempts each loop. Give hints to help the user narrow down.` },
+    { diff:"hard", title:"Diamond Pattern",
+      code:`n = 5  # must be odd\n# Top half (including middle)\nfor i in range(n // 2 + 1):\n    spaces = " " * (n // 2 - i)\n    stars = "*" * (2 * i + 1)\n    print(spaces + stars)\n# Bottom half\nfor i in range(n // 2 - 1, -1, -1):\n    spaces = " " * (n // 2 - i)\n    stars = "*" * (2 * i + 1)\n    print(spaces + stars)`,
+      output:`  *\n ***\n*****\n ***\n  *`,
+      explain:`Top half: stars = 2i+1 (1,3,5...). Spaces = n//2 - i. Bottom half is reverse of top (excluding middle row).` },
+    { diff:"hard", title:"Alternating Series",
+      code:`n = int(input("Enter number of terms: "))\ntotal = 0\nsign = 1\nfor i in range(1, n + 1):\n    total += sign / i\n    sign *= -1  # flip sign: +1 → -1 → +1...\nprint(f"Sum = {round(total, 4)}")`,
+      output:`4 terms → 1 - 0.5 + 0.333 - 0.25 = 0.5833`,
+      explain:`sign variable alternates between +1 and -1 each iteration (multiply by -1 flips it). Add sign/i each time.` },
+    { diff:"hard", title:"Floyd's Triangle",
+      code:`n = int(input("Enter rows: "))\ncount = 1\nfor i in range(1, n + 1):\n    for j in range(i):\n        print(count, end=" ")\n        count += 1\n    print()`,
+      output:`1\n2 3\n4 5 6\n7 8 9 10`,
+      explain:`Single counter that just keeps going up. Outer loop controls rows, inner loop prints 'i' numbers per row. count never resets.` },
+    { diff:"expert", title:"All Pairs with Sum K",
+      code:`nums = [1, 2, 3, 4, 5, 6]\nk = 7\nprint(f"Pairs that sum to {k}:")\nfor i in range(len(nums)):\n    for j in range(i + 1, len(nums)):  # j starts AFTER i\n        if nums[i] + nums[j] == k:\n            print(f"({nums[i]}, {nums[j]})")`,
+      output:`(1,6)\n(2,5)\n(3,4)`,
+      explain:`Nested loops. j starts at i+1 to avoid duplicate pairs and self-pairing. Check if sum equals k.` },
+  ]
+},
+{
+  icon:"🔤", name:"Strings",
+  solutions:[
+    { diff:"beginner", title:"String Length (no len)",
+      code:`s = input("Enter a string: ")\ncount = 0\nfor ch in s:\n    count += 1\nprint(f"Length: {count}")`,
+      output:`'hello' → Length: 5`,
+      explain:`Loop through every character in the string and count each one. This is what len() does internally!` },
+    { diff:"beginner", title:"Count Vowels",
+      code:`s = input("Enter a string: ")\nvowels = "aeiouAEIOU"\ncount = 0\nfor ch in s:\n    if ch in vowels:\n        count += 1\nprint(f"Vowels: {count}")`,
+      output:`'Hello World' → Vowels: 3 (e, o, o)`,
+      explain:`'in' operator checks if character is inside the vowels string. Handles both uppercase and lowercase.` },
+    { diff:"beginner", title:"Reverse String (no [::-1])",
+      code:`s = input("Enter a string: ")\nresult = ""\nfor ch in s:\n    result = ch + result  # prepend, not append!\nprint(f"Reversed: {result}")`,
+      output:`'python' → 'nohtyp'`,
+      explain:`Key: result = ch + result (put new char at FRONT, not end). 'p' → 'y'+'p'='yp' → 't'+'yp'='typ'...` },
+    { diff:"easy", title:"Palindrome String",
+      code:`s = input("Enter string: ")\ncleaned = s.replace(" ", "").lower()\nif cleaned == cleaned[::-1]:\n    print("Palindrome ✓")\nelse:\n    print("Not a Palindrome ✗")`,
+      output:`'racecar' → Palindrome ✓\n'hello' → Not a Palindrome ✗`,
+      explain:`Remove spaces, convert to lowercase, then compare with its reverse ([::-1]). 'A man a plan a canal Panama' becomes 'amanaplanacanalpanama'.` },
+    { diff:"easy", title:"Count Words",
+      code:`s = input("Enter sentence: ")\nwords = 0\nin_word = False\nfor ch in s:\n    if ch != " " and not in_word:\n        words += 1\n        in_word = True\n    elif ch == " ":\n        in_word = False\nprint(f"Word count: {words}")`,
+      output:`'I love Python' → 3\n'  hello   world  ' → 2`,
+      explain:`Track if we're inside a word. When we go from space to non-space, that's a new word. Handles multiple spaces correctly.` },
+    { diff:"easy", title:"Title Case",
+      code:`s = input("Enter sentence: ")\nwords = s.split()\nresult = []\nfor word in words:\n    titled = word[0].upper() + word[1:].lower()\n    result.append(titled)\nprint(" ".join(result))`,
+      output:`'hello world' → 'Hello World'`,
+      explain:`split() breaks sentence into word list. word[0].upper() capitalizes first letter. word[1:] gets rest of word. join() puts them back together.` },
+    { diff:"easy", title:"Caesar Cipher",
+      code:`text = input("Enter text: ")\nk = int(input("Shift by: "))\nresult = ""\nfor ch in text:\n    if ch.isalpha():\n        base = ord('a') if ch.islower() else ord('A')\n        shifted = chr((ord(ch) - base + k) % 26 + base)\n        result += shifted\n    else:\n        result += ch  # keep non-letters as is\nprint(f"Encoded: {result}")`,
+      output:`'hello', k=3 → 'khoor'`,
+      explain:`ord() gets ASCII number. Subtract base ('a'=97), add shift k, wrap with %26 (alphabet is 26 letters), add base back, chr() converts back to letter.` },
+    { diff:"medium", title:"Anagram Check",
+      code:`s1 = input("String 1: ").lower().replace(" ","")\ns2 = input("String 2: ").lower().replace(" ","")\nif sorted(s1) == sorted(s2):\n    print("Anagram ✓")\nelse:\n    print("Not an anagram ✗")`,
+      output:`'listen','silent' → Anagram ✓\n'hello','world' → Not anagram ✗`,
+      explain:`Anagrams have same letters in different order. sorted() sorts characters alphabetically. If sorted versions match → anagram!` },
+    { diff:"medium", title:"Most Frequent Char",
+      code:`s = input("Enter string: ").replace(" ", "")\nfreq = {}\nfor ch in s:\n    freq[ch] = freq.get(ch, 0) + 1\nmax_char = max(freq, key=freq.get)\nprint(f"Most frequent: '{max_char}' ({freq[max_char]} times)")\nprint(f"All frequencies: {freq}")`,
+      output:`'programming' → Most frequent: 'g' (2 times)`,
+      explain:`Build frequency dict. freq.get(ch, 0) returns 0 if ch not in dict. max(dict, key=dict.get) finds key with highest value.` },
+    { diff:"medium", title:"Remove Duplicates",
+      code:`s = input("Enter string: ")\nseen = set()\nresult = ""\nfor ch in s:\n    if ch not in seen:\n        result += ch\n        seen.add(ch)\nprint(f"After removing duplicates: {result}")`,
+      output:`'programming' → 'progamin'`,
+      explain:`seen set tracks which chars we've already added. Only add to result if not seen before. Sets have O(1) lookup (very fast).` },
+    { diff:"medium", title:"String Compression",
+      code:`s = input("Enter string: ")\nif not s:\n    print("Empty string")\nelse:\n    result = ""\n    curr = s[0]\n    count = 1\n    for i in range(1, len(s)):\n        if s[i] == curr:\n            count += 1\n        else:\n            result += curr + str(count)\n            curr = s[i]\n            count = 1\n    result += curr + str(count)  # don't forget last group!\n    print(f"Compressed: {result}")`,
+      output:`'aaabbbcccc' → 'a3b3c4'`,
+      explain:`Track current char and its count. When character CHANGES: append current+count to result, reset to new char. Add final group after loop.` },
+    { diff:"hard", title:"Valid Parentheses",
+      code:`s = input("Enter brackets: ")\nstack = []\nmatching = {')':'(', '}':'{', ']':'['}\nvalid = True\nfor ch in s:\n    if ch in "({[":\n        stack.append(ch)  # push opening bracket\n    elif ch in ")}]":\n        if not stack or stack[-1] != matching[ch]:\n            valid = False\n            break\n        stack.pop()  # pop matching bracket\nif valid and not stack:\n    print("Valid ✓")\nelse:\n    print("Invalid ✗")`,
+      output:`'(){}[]' → Valid ✓\n'({)}' → Invalid ✗`,
+      explain:`Stack (LIFO). Push opening brackets. When closing bracket comes, check if top of stack matches. At end, stack must be empty.` },
+    { diff:"hard", title:"Longest Common Prefix",
+      code:`words = input("Enter words separated by spaces: ").split()\nif not words:\n    print("No prefix")\nelse:\n    prefix = words[0]\n    for word in words[1:]:\n        while not word.startswith(prefix):\n            prefix = prefix[:-1]  # remove last char\n            if not prefix:\n                print("No common prefix")\n                break\n    print(f"Longest common prefix: '{prefix}'")`,
+      output:`'flower flow flight' → 'fl'`,
+      explain:`Start with first word as prefix. For each other word: keep shortening prefix until that word starts with it. prefix[:-1] removes last character.` },
+  ]
+},
+{
+  icon:"📋", name:"Lists & Arrays",
+  solutions:[
+    { diff:"beginner", title:"Sum & Average",
+      code:`lst = [3, 7, 2, 9, 4, 6, 1, 8, 5]\ntotal = 0\nfor n in lst:\n    total += n\navg = total / len(lst)\nprint(f"Sum: {total}")\nprint(f"Average: {avg}")`,
+      output:`Sum: 45\nAverage: 5.0`,
+      explain:`Accumulator pattern. Add each element to total. Average = total / count of elements.` },
+    { diff:"beginner", title:"Count Occurrences",
+      code:`lst = [1, 2, 3, 2, 4, 2, 5]\ntarget = int(input("Find: "))\ncount = 0\nfor item in lst:\n    if item == target:\n        count += 1\nprint(f"{target} appears {count} times")`,
+      output:`Find 2 → 2 appears 3 times`,
+      explain:`Simple loop. Check each element. If equal to target, increment count.` },
+    { diff:"beginner", title:"Linear Search",
+      code:`lst = [5, 3, 8, 1, 9, 4]\ntarget = int(input("Search for: "))\nfound = -1\nfor i in range(len(lst)):\n    if lst[i] == target:\n        found = i\n        break\nif found != -1:\n    print(f"Found at index {found}")\nelse:\n    print("Not found")`,
+      output:`Search 8 → Found at index 2\nSearch 7 → Not found`,
+      explain:`Loop with index using range(len(lst)). If match found, save index and break (stop searching). Return -1 if never found.` },
+    { diff:"easy", title:"Find Min and Max",
+      code:`lst = [4, 2, 9, 1, 7, 6]\nmin_val = lst[0]\nmax_val = lst[0]\nfor n in lst:\n    if n < min_val:\n        min_val = n\n    if n > max_val:\n        max_val = n\nprint(f"Min: {min_val}, Max: {max_val}")`,
+      output:`[4,2,9,1,7,6] → Min: 1, Max: 9`,
+      explain:`Initialize both with first element. Loop through: update min if smaller found, update max if larger found. Both in ONE loop!` },
+    { diff:"easy", title:"Reverse a List",
+      code:`lst = [1, 2, 3, 4, 5]\nleft = 0\nright = len(lst) - 1\nwhile left < right:\n    lst[left], lst[right] = lst[right], lst[left]  # swap\n    left += 1\n    right -= 1\nprint(f"Reversed: {lst}")`,
+      output:`[1,2,3,4,5] → [5,4,3,2,1]`,
+      explain:`Two pointers from both ends, moving toward center. Swap elements at left and right, then move both inward until they meet.` },
+    { diff:"easy", title:"Remove Duplicates",
+      code:`lst = [1, 2, 2, 3, 3, 3, 4, 5, 5]\nseen = set()\nresult = []\nfor item in lst:\n    if item not in seen:\n        result.append(item)\n        seen.add(item)\nprint(f"Unique: {result}")`,
+      output:`[1,2,2,3,3,3,4,5,5] → [1,2,3,4,5]`,
+      explain:`set for fast lookup (O(1)). Only append to result if not seen before. Maintains original order.` },
+    { diff:"easy", title:"Second Largest",
+      code:`lst = [3, 1, 4, 1, 5, 9, 2, 6]\nfirst = second = float('-inf')  # negative infinity\nfor n in lst:\n    if n > first:\n        second = first  # old first becomes second\n        first = n\n    elif n > second and n != first:\n        second = n\nprint(f"Second largest: {second}")`,
+      output:`[3,1,4,1,5,9,2,6] → Second largest: 6`,
+      explain:`Track two variables: first and second max. When new max found: old first → second, new value → first. Also update second if bigger than current second but not equal to first.` },
+    { diff:"medium", title:"Bubble Sort",
+      code:`lst = [64, 34, 25, 12, 22, 11, 90]\nn = len(lst)\nfor i in range(n):\n    for j in range(0, n - i - 1):\n        if lst[j] > lst[j + 1]:\n            lst[j], lst[j+1] = lst[j+1], lst[j]  # swap\nprint(f"Sorted: {lst}")`,
+      output:`[64,34,25,12,22,11,90] → [11,12,22,25,34,64,90]`,
+      explain:`Compare adjacent elements. If left > right → swap. After each outer loop pass, the largest element "bubbles" to the end. Reduce inner loop each time (-i-1).` },
+    { diff:"medium", title:"Rotate List",
+      code:`lst = [1, 2, 3, 4, 5]\nk = int(input("Rotate by: "))\nk = k % len(lst)  # handle k > length\nrotated = lst[-k:] + lst[:-k]\nprint(f"Rotated: {rotated}")`,
+      output:`[1,2,3,4,5], k=2 → [4,5,1,2,3]`,
+      explain:`lst[-k:] gets last k elements. lst[:-k] gets everything except last k. Concatenate: last part first, then first part.` },
+    { diff:"medium", title:"Two Sum",
+      code:`nums = [2, 7, 11, 15]\ntarget = 9\nfor i in range(len(nums)):\n    for j in range(i + 1, len(nums)):\n        if nums[i] + nums[j] == target:\n            print(f"Indices: [{i}, {j}] → {nums[i]} + {nums[j]} = {target}")`,
+      output:`[2,7,11,15], target=9 → Indices: [0, 1] → 2 + 7 = 9`,
+      explain:`Nested loops. j starts at i+1 (avoids using same element twice). Check if pair sums to target. O(n²) solution.` },
+    { diff:"medium", title:"Merge Sorted Lists",
+      code:`a = [1, 3, 5, 7]\nb = [2, 4, 6, 8]\nmerged = []\ni = j = 0\nwhile i < len(a) and j < len(b):\n    if a[i] < b[j]:\n        merged.append(a[i])\n        i += 1\n    else:\n        merged.append(b[j])\n        j += 1\nmerged += a[i:]  # remaining elements\nmerged += b[j:]\nprint(f"Merged: {merged}")`,
+      output:`[1,3,5,7] + [2,4,6,8] → [1,2,3,4,5,6,7,8]`,
+      explain:`Two pointers i and j. Always pick the smaller front element, advance that pointer. After one list ends, append remaining elements of other list.` },
+    { diff:"hard", title:"Kadane's Algorithm",
+      code:`lst = [-2, 1, -3, 4, -1, 2, 1, -5, 4]\ncurr_max = global_max = lst[0]\nstart = end = temp_start = 0\nfor i in range(1, len(lst)):\n    if lst[i] > curr_max + lst[i]:\n        curr_max = lst[i]\n        temp_start = i\n    else:\n        curr_max += lst[i]\n    if curr_max > global_max:\n        global_max = curr_max\n        start = temp_start\n        end = i\nprint(f"Max sum: {global_max}")\nprint(f"Subarray: {lst[start:end+1]}")`,
+      output:`Max sum: 6\nSubarray: [4, -1, 2, 1]`,
+      explain:`At each element: decide whether to extend current subarray or start fresh. curr_max = max(num, curr_max + num). Track global max seen so far.` },
+    { diff:"expert", title:"Find Missing Number",
+      code:`lst = [1, 2, 4, 5]  # 3 is missing\nn = 5  # numbers should be 1 to 5\nexpected_sum = n * (n + 1) // 2  # formula: n(n+1)/2\nactual_sum = 0\nfor num in lst:\n    actual_sum += num\nmissing = expected_sum - actual_sum\nprint(f"Missing number: {missing}")`,
+      output:`[1,2,4,5] → Missing: 3`,
+      explain:`Sum of 1 to n = n(n+1)/2. If all numbers were there, sum would be this. Actual sum is less. Difference = missing number. O(n) time, O(1) space!` },
+  ]
+},
+{
+  icon:"⚙️", name:"Functions",
+  solutions:[
+    { diff:"beginner", title:"Greet Function",
+      code:`def greet(name):\n    return f"Hello, {name}! Welcome to Python."\n\nprint(greet("Rahul"))\nprint(greet("Priya"))\nprint(greet("World"))`,
+      output:`Hello, Rahul! Welcome to Python.\nHello, Priya! Welcome to Python.\nHello, World! Welcome to Python.`,
+      explain:`def defines a function. Parameter 'name' accepts any value we pass. return sends value back. Call it by name with argument.` },
+    { diff:"beginner", title:"Even or Odd Function",
+      code:`def is_even(n):\n    return n % 2 == 0  # returns True or False\n\n# Test with 5 numbers\nfor num in [2, 7, 10, 13, 100]:\n    print(f"{num} → {'Even' if is_even(num) else 'Odd'}")`,
+      output:`2→Even, 7→Odd, 10→Even, 13→Odd, 100→Even`,
+      explain:`n%2==0 is a boolean expression (True/False). We return it directly. Single line return is clean!` },
+    { diff:"easy", title:"Min of Two",
+      code:`def min_of_two(a, b):\n    if a <= b:\n        return a\n    else:\n        return b\n\nprint(min_of_two(5, 3))   # 3\nprint(min_of_two(7, 7))   # 7\nprint(min_of_two(10, 2))  # 2`,
+      output:`3\n7\n2`,
+      explain:`<= handles equal case correctly (returns a when equal, which is fine since both have same value).` },
+    { diff:"easy", title:"Count Vowels Function",
+      code:`def count_vowels(text):\n    vowels = "aeiouAEIOU"\n    count = 0\n    for ch in text:\n        if ch in vowels:\n            count += 1\n    return count\n\nprint(count_vowels("python"))       # 1\nprint(count_vowels("Hello World"))  # 3\nprint(count_vowels("aeiou"))        # 5`,
+      output:`1\n3\n5`,
+      explain:`Function reusability! We wrote the logic once, call it many times with different inputs. No code repetition.` },
+    { diff:"easy", title:"Calculator Functions",
+      code:`def add(a, b):      return a + b\ndef subtract(a, b): return a - b\ndef multiply(a, b): return a * b\ndef divide(a, b):\n    if b == 0:\n        return "Error: Cannot divide by zero!"\n    return a / b\n\nprint(add(3, 4))         # 7\nprint(subtract(10, 3))   # 7\nprint(multiply(4, 5))    # 20\nprint(divide(10, 0))     # Error\nprint(divide(10, 2))     # 5.0`,
+      output:`7\n7\n20\nError: Cannot divide by zero!\n5.0`,
+      explain:`Each operation is a separate function. divide() handles the zero case before dividing.` },
+    { diff:"easy", title:"Power Function",
+      code:`def power(base, exp):\n    if exp == 0:\n        return 1  # anything^0 = 1\n    result = 1\n    for _ in range(exp):\n        result *= base\n    return result\n\nprint(power(2, 10))  # 1024\nprint(power(3, 4))   # 81\nprint(power(5, 0))   # 1`,
+      output:`1024\n81\n1`,
+      explain:`Edge case: exp=0 → return 1. _ is used when loop variable isn't needed. Multiply base by itself exp times.` },
+    { diff:"medium", title:"Fibonacci Function",
+      code:`def fib(n):\n    if n == 0: return 0\n    if n == 1: return 1\n    a, b = 0, 1\n    for _ in range(n - 1):\n        a, b = b, a + b\n    return b\n\nfor i in range(11):\n    print(f"fib({i}) = {fib(i)}")`,
+      output:`fib(0)=0, fib(1)=1, fib(2)=1, fib(7)=13, fib(10)=55`,
+      explain:`Handle n=0 and n=1 as special cases. For n>1: do n-1 iterations of tuple swap. After loop, b holds the nth Fibonacci number.` },
+    { diff:"medium", title:"Is Prime Function",
+      code:`import math\ndef is_prime(n):\n    if n < 2: return False\n    for i in range(2, int(math.sqrt(n)) + 1):\n        if n % i == 0:\n            return False\n    return True\n\n# Print all primes up to 50\nprimes = [n for n in range(2, 51) if is_prime(n)]\nprint(primes)`,
+      output:`[2,3,5,7,11,13,17,19,23,29,31,37,41,43,47]`,
+      explain:`Only check divisors up to √n (not n). Because if n has a factor > √n, it must also have one < √n. This is O(√n) instead of O(n)!` },
+    { diff:"medium", title:"Recursive Factorial",
+      code:`def factorial(n):\n    # Base case — stops recursion\n    if n == 0 or n == 1:\n        return 1\n    # Recursive case — calls itself\n    return n * factorial(n - 1)\n\nprint(factorial(5))   # 120\nprint(factorial(0))   # 1\nprint(factorial(10))  # 3628800`,
+      output:`120\n1\n3628800`,
+      explain:`Recursion = function calling itself! Base case (n=0,1) stops it. factorial(5) = 5 × factorial(4) = 5 × 4 × factorial(3) = ... = 5×4×3×2×1 = 120.` },
+    { diff:"medium", title:"Recursive Sum of List",
+      code:`def sum_list(lst):\n    if len(lst) == 0:  # base case: empty list\n        return 0\n    return lst[0] + sum_list(lst[1:])  # first + rest\n\nprint(sum_list([1, 2, 3, 4, 5]))  # 15\nprint(sum_list([]))               # 0\nprint(sum_list([10]))             # 10`,
+      output:`15\n0\n10`,
+      explain:`sum_list([1,2,3,4,5]) = 1 + sum_list([2,3,4,5]) = 1+2+sum_list([3,4,5]) = ... until empty list returns 0.` },
+    { diff:"hard", title:"Memoized Fibonacci",
+      code:`# Without memoization (SLOW)\ndef fib_slow(n):\n    if n <= 1: return n\n    return fib_slow(n-1) + fib_slow(n-2)\n\n# With memoization (FAST)\nmemo = {}\ndef fib_fast(n):\n    if n in memo: return memo[n]  # cache hit!\n    if n <= 1: return n\n    memo[n] = fib_fast(n-1) + fib_fast(n-2)\n    return memo[n]\n\nprint(fib_fast(35))  # 9227465 — instant!`,
+      output:`fib_fast(35) = 9227465 (instant)\nfib_slow(35) = 9227465 (very slow!)`,
+      explain:`Without memo, fib(35) computes same values millions of times! With memo dict, each value computed ONCE and cached. This is Dynamic Programming!` },
+    { diff:"hard", title:"Binary Search",
+      code:`def binary_search(lst, target):\n    low = 0\n    high = len(lst) - 1\n    while low <= high:\n        mid = (low + high) // 2\n        if lst[mid] == target:\n            return mid\n        elif lst[mid] < target:\n            low = mid + 1   # search right half\n        else:\n            high = mid - 1  # search left half\n    return -1  # not found\n\nsorted_list = [1, 3, 5, 7, 9, 11, 13]\nprint(binary_search(sorted_list, 7))   # 3\nprint(binary_search(sorted_list, 6))   # -1`,
+      output:`Found at index: 3\nNot found: -1`,
+      explain:`Each step eliminates HALF the list. If mid element is too small → target in right half. Too big → left half. O(log n) — 1 billion elements needs only 30 steps!` },
+    { diff:"expert", title:"Tower of Hanoi",
+      code:`def hanoi(n, source, destination, auxiliary):\n    if n == 1:\n        print(f"Move disk 1: {source} → {destination}")\n        return\n    # Move n-1 disks from source to auxiliary\n    hanoi(n-1, source, auxiliary, destination)\n    # Move largest disk to destination\n    print(f"Move disk {n}: {source} → {destination}")\n    # Move n-1 disks from auxiliary to destination\n    hanoi(n-1, auxiliary, destination, source)\n\nhanoi(3, 'A', 'C', 'B')`,
+      output:`Move disk 1: A→C\nMove disk 2: A→B\nMove disk 1: C→B\nMove disk 3: A→C\nMove disk 1: B→A\nMove disk 2: B→C\nMove disk 1: A→C`,
+      explain:`Magic of recursion! 3 steps: 1) Move n-1 disks out of way. 2) Move biggest disk to destination. 3) Move n-1 disks back on top. Total moves = 2ⁿ - 1.` },
+  ]
+},
+{
+  icon:"🗂️", name:"Dictionaries",
+  solutions:[
+    { diff:"beginner", title:"Student Record",
+      code:`student = {\n    "name": "Rahul",\n    "age": 20,\n    "marks": 85,\n    "city": "Mumbai"\n}\nfor key, value in student.items():\n    print(f"{key}: {value}")`,
+      output:`name: Rahul\nage: 20\nmarks: 85\ncity: Mumbai`,
+      explain:`.items() returns (key, value) pairs. We unpack them in the for loop as 'key, value'.` },
+    { diff:"beginner", title:"Phone Book",
+      code:`phonebook = {\n    "Rahul": "9876543210",\n    "Priya": "9123456789",\n    "Amit": "9988776655",\n    "Sneha": "9765432100",\n    "Raj": "9871234560"\n}\nname = input("Search contact: ")\nprint(phonebook.get(name, "Contact not found"))`,
+      output:`Search: 'Priya' → 9123456789\nSearch: 'Bob' → Contact not found`,
+      explain:`.get(key, default) safely looks up key. If not found, returns default value instead of crashing with KeyError.` },
+    { diff:"easy", title:"Word Frequency",
+      code:`sentence = input("Enter sentence: ")\nwords = sentence.lower().split()\nfreq = {}\nfor word in words:\n    freq[word] = freq.get(word, 0) + 1\nfor word, count in sorted(freq.items()):\n    print(f"{word}: {count}")`,
+      output:`'the cat sat on the mat' → cat:1, mat:1, on:1, sat:1, the:2`,
+      explain:`freq.get(word, 0) + 1 increments count safely. If word not in dict, starts at 0 then adds 1.` },
+    { diff:"easy", title:"Character Frequency",
+      code:`s = input("Enter string: ").replace(" ", "")\nfreq = {}\nfor ch in s:\n    freq[ch] = freq.get(ch, 0) + 1\nprint(f"Frequencies: {freq}")\nmost_common = max(freq, key=freq.get)\nprint(f"Most common: '{most_common}' ({freq[most_common]} times)")`,
+      output:`'programming' → Most common: 'g'(2) or 'm'(2)`,
+      explain:`max(dict, key=dict.get) finds the key with maximum value. Same as max(freq.keys(), key=lambda k: freq[k]).` },
+    { diff:"easy", title:"Invert Dictionary",
+      code:`original = {'a': 1, 'b': 2, 'c': 3, 'd': 4}\ninverted = {}\nfor key, value in original.items():\n    inverted[value] = key\nprint(f"Original: {original}")\nprint(f"Inverted: {inverted}")`,
+      output:`Original: {'a':1,'b':2,'c':3}\nInverted: {1:'a',2:'b',3:'c'}`,
+      explain:`Loop through items, build new dict with keys and values SWAPPED. Only works if all values are unique.` },
+    { diff:"medium", title:"Group by First Letter",
+      code:`words = ["apple","ant","ball","cat","cow","carrot","avocado"]\ngroups = {}\nfor word in words:\n    first = word[0]  # first letter\n    if first not in groups:\n        groups[first] = []  # create empty list\n    groups[first].append(word)\nfor letter, word_list in sorted(groups.items()):\n    print(f"{letter}: {word_list}")`,
+      output:`a: ['apple','ant','avocado']\nb: ['ball']\nc: ['cat','cow','carrot']`,
+      explain:`Check if key exists. If not, create empty list. Then append word to the list. setdefault() is a shortcut: groups.setdefault(first, []).append(word).` },
+    { diff:"medium", title:"Two Sum with Dict",
+      code:`nums = [2, 7, 11, 15]\ntarget = 9\nseen = {}  # num → index\nfor i, n in enumerate(nums):\n    complement = target - n\n    if complement in seen:\n        print(f"Indices: [{seen[complement]}, {i}]")\n        print(f"{complement} + {n} = {target}")\n        break\n    seen[n] = i  # store this number's index`,
+      output:`Indices: [0, 1]\n2 + 7 = 9`,
+      explain:`O(n) solution! For each num, check if (target-num) was seen before. If yes → found! Store each num in dict as we go. One pass only!` },
+    { diff:"medium", title:"Most Common N Words",
+      code:`text = "the cat the mat cat sat on the mat"\nwords = text.lower().split()\nfreq = {}\nfor word in words:\n    freq[word] = freq.get(word, 0) + 1\n# Sort by frequency, take top N\nN = 3\ntop_n = sorted(freq.items(), key=lambda x: x[1], reverse=True)[:N]\nfor word, count in top_n:\n    print(f"{word}: {count}")`,
+      output:`the: 3\nmat: 2\ncat: 2`,
+      explain:`sorted() with key=lambda x: x[1] sorts by the VALUE (count). reverse=True for highest first. [:N] takes only first N items.` },
+  ]
+},
+{
+  icon:"🏆", name:"Interview Problems",
+  solutions:[
+    { diff:"easy", title:"FizzBuzz",
+      code:`for n in range(1, 101):\n    if n % 15 == 0:      # check 15 FIRST!\n        print("FizzBuzz")\n    elif n % 3 == 0:\n        print("Fizz")\n    elif n % 5 == 0:\n        print("Buzz")\n    else:\n        print(n)`,
+      output:`1,2,Fizz,4,Buzz,Fizz,7,8,Fizz,Buzz,11,Fizz,13,14,FizzBuzz,16...`,
+      explain:`CRITICAL: Check 15 FIRST (divisible by both 3 and 5). If you check 3 first, FizzBuzz numbers would just print "Fizz".` },
+    { diff:"medium", title:"Move Zeros to End",
+      code:`nums = [0, 1, 0, 3, 12]\nwrite = 0  # position to write next non-zero\nfor n in nums:\n    if n != 0:\n        nums[write] = n\n        write += 1\n# Fill remaining with zeros\nwhile write < len(nums):\n    nums[write] = 0\n    write += 1\nprint(nums)`,
+      output:`[0,1,0,3,12] → [1,3,12,0,0]`,
+      explain:`Two-pointer. 'write' tracks where to put next non-zero. Loop: copy non-zeros to front. Then fill rest with zeros. O(n), in-place.` },
+    { diff:"hard", title:"Stock Max Profit",
+      code:`prices = [7, 1, 5, 3, 6, 4]\nmin_price = prices[0]\nmax_profit = 0\nfor price in prices:\n    if price < min_price:\n        min_price = price        # found cheaper buy price\n    profit = price - min_price   # profit if sell today\n    if profit > max_profit:\n        max_profit = profit\nprint(f"Max profit: {max_profit}")`,
+      output:`[7,1,5,3,6,4] → Max profit: 5 (buy@1, sell@6)`,
+      explain:`Track minimum price seen so far. At each price, calculate profit (price - min_price). Update max_profit. One pass, O(n).` },
+    { diff:"hard", title:"Kadane's (Max Subarray)",
+      code:`nums = [-2, 1, -3, 4, -1, 2, 1, -5, 4]\ncurr = nums[0]\nbest = nums[0]\nfor n in nums[1:]:\n    curr = max(n, curr + n)  # extend or restart?\n    best = max(best, curr)\nprint(f"Maximum subarray sum: {best}")`,
+      output:`Max subarray sum: 6\n(subarray [4,-1,2,1])`,
+      explain:`Key decision: is it better to extend current subarray (curr+n) or start fresh (just n)? Take the max. Update global best. Elegant O(n) solution!` },
+    { diff:"hard", title:"Merge Intervals",
+      code:`intervals = [[1,3],[2,6],[8,10],[15,18]]\nintervals.sort(key=lambda x: x[0])  # sort by start\nmerged = [intervals[0]]\nfor start, end in intervals[1:]:\n    last = merged[-1]\n    if start <= last[1]:  # overlapping!\n        last[1] = max(last[1], end)  # extend\n    else:\n        merged.append([start, end])\nprint(f"Merged: {merged}")`,
+      output:`[[1,3],[2,6],[8,10],[15,18]] → [[1,6],[8,10],[15,18]]`,
+      explain:`Sort by start time. For each interval: if it overlaps with last merged (start <= last end), extend last end. Otherwise add as new interval.` },
+    { diff:"expert", title:"Trapping Rainwater",
+      code:`height = [0,1,0,2,1,0,1,3,2,1,2,1]\nn = len(height)\n# Build left_max and right_max arrays\nleft_max = [0] * n\nright_max = [0] * n\nleft_max[0] = height[0]\nfor i in range(1, n):\n    left_max[i] = max(left_max[i-1], height[i])\nright_max[n-1] = height[n-1]\nfor i in range(n-2, -1, -1):\n    right_max[i] = max(right_max[i+1], height[i])\n# Water at each position\nwater = 0\nfor i in range(n):\n    water += min(left_max[i], right_max[i]) - height[i]\nprint(f"Total water: {water}")`,
+      output:`Total water trapped: 6 units`,
+      explain:`Water at position i = min(tallest wall on left, tallest wall on right) - height[i]. Precompute left_max and right_max arrays, then calculate water in one more pass.` },
+    { diff:"expert", title:"Longest Increasing Subsequence",
+      code:`nums = [10, 9, 2, 5, 3, 7, 101, 18]\nn = len(nums)\ndp = [1] * n  # each element is LIS of length 1 alone\nfor i in range(1, n):\n    for j in range(i):\n        if nums[j] < nums[i]:  # can extend!\n            dp[i] = max(dp[i], dp[j] + 1)\nprint(f"LIS length: {max(dp)}")\nprint(f"dp array: {dp}")`,
+      output:`LIS length: 4\ndp array: [1,1,1,2,2,3,4,4]\n(subsequence: 2,3,7,101)`,
+      explain:`dp[i] = length of longest increasing subsequence ENDING at index i. For each i, check all j before it: if nums[j]<nums[i], we can extend that subsequence. Classic DP!` },
+  ]
+}
+];
+
+let currentTopic = 0;
+let activeFilter = 'all';
+
+function init() {
+  // Build sidebar
+  const nav = document.getElementById('sbNav');
+  nav.innerHTML = TOPICS.map((t,i) => `
+    <div class="sb-item ${i===0?'active':''}" onclick="loadTopic(${i})">
+      <div class="sb-icon">${t.icon}</div>
+      <div>
+        <div class="sb-name">${t.name}</div>
+        <div class="sb-count">${t.solutions.length} solutions</div>
+      </div>
+    </div>
+  `).join('');
+  loadTopic(0);
+}
+
+function loadTopic(idx) {
+  currentTopic = idx;
+  activeFilter = 'all';
+  document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('on'));
+  document.querySelector('.fbtn.all').classList.add('on');
+  document.querySelectorAll('.sb-item').forEach((el,i)=>el.classList.toggle('active',i===idx));
+  document.getElementById('topTitle').textContent = TOPICS[idx].icon + ' ' + TOPICS[idx].name;
+  document.getElementById('topSub').textContent = `${TOPICS[idx].solutions.length} solutions — click any card to expand`;
+  renderSolutions();
+}
+
+function renderSolutions() {
+  const t = TOPICS[currentTopic];
+  const diffs = ['beginner','easy','medium','hard','expert'];
+  const labels = {beginner:'🟢 BEGINNER', easy:'🔵 EASY', medium:'🟡 MEDIUM', hard:'🔴 HARD', expert:'⚫ EXPERT'};
+  let html = '';
+  let num = 1;
+  diffs.forEach(diff => {
+    const qs = t.solutions.filter(s=>s.diff===diff);
+    if(!qs.length) return;
+    if(activeFilter !== 'all' && activeFilter !== diff) return;
+    html += `<div>
+      <div class="diff-section-hdr">
+        <span class="diff-section-hdr-label" style="color:var(--${diff})">${labels[diff]}</span>
+        <div class="diff-section-hdr-line"></div>
+      </div>`;
+    qs.forEach((s, si) => {
+      const idx = t.solutions.indexOf(s);
+      html += `
+        <div class="sol-card" data-diff="${diff}" id="sc-${idx}">
+          <div class="sol-header" onclick="toggleCard(${idx})">
+            <div class="sol-num">#${String(num).padStart(3,'0')}</div>
+            <div class="sol-info">
+              <div class="sol-title">${s.title}</div>
+              <div class="sol-desc">${s.explain.substring(0,80)}...</div>
+            </div>
+            <div class="sol-right">
+              <span class="diff-pill dp-${diff}">${diff.toUpperCase()}</span>
+              <span class="chevron">▾</span>
+            </div>
+          </div>
+          <div class="sol-body">
+            <div class="sol-inner">
+              <div>
+                <div class="sec-label">Python Solution</div>
+                <div class="code-wrap">
+                  <div class="code-block" id="code-${idx}">${hl(s.code)}</div>
+                  <button class="copy-btn" onclick="copyCode(${idx})">Copy</button>
+                </div>
+              </div>
+              <div>
+                <div class="sec-label">Output</div>
+                <div class="output-box">${s.output}</div>
+              </div>
+              <div>
+                <div class="sec-label">💡 Explanation</div>
+                <div class="explain-box">${s.explain}</div>
+              </div>
+            </div>
+          </div>
+        </div>`;
+      num++;
+    });
+    html += '</div>';
+  });
+  document.getElementById('content').innerHTML = html || '<div style="padding:40px;color:var(--muted);text-align:center">No solutions for this filter</div>';
+}
+
+function toggleCard(idx) {
+  const card = document.getElementById(`sc-${idx}`);
+  card.classList.toggle('open');
+}
+
+function setFilter(f) {
+  activeFilter = f;
+  document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('on'));
+  const map = {all:'all',beginner:'fb',easy:'fe',medium:'fm',hard:'fh',expert:'fx'};
+  document.querySelector(`.fbtn.${map[f]}`).classList.add('on');
+  renderSolutions();
+}
+
+function copyCode(idx) {
+  const t = TOPICS[currentTopic];
+  const code = t.solutions[idx].code;
+  navigator.clipboard.writeText(code).then(() => {
+    const btn = document.querySelector(`#sc-${idx} .copy-btn`);
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent='Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+init();
+</script>
+</body>
+</html>

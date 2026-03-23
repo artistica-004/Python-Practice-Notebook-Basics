@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Python 0 to Hero — Question Bank</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Clash+Display:wght@400;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #080b12;
+  --surface: #0e1320;
+  --card: #111827;
+  --border: #1f2937;
+  --border2: #2d3748;
+  --text: #f1f5f9;
+  --muted: #64748b;
+  --dim: #94a3b8;
+  
+  --beginner: #22c55e;
+  --easy: #3b82f6;
+  --medium: #f59e0b;
+  --hard: #ef4444;
+  --expert: #a855f7;
+
+  --beginner-bg: rgba(34,197,94,0.08);
+  --easy-bg: rgba(59,130,246,0.08);
+  --medium-bg: rgba(245,158,11,0.08);
+  --hard-bg: rgba(239,68,68,0.08);
+  --expert-bg: rgba(168,85,247,0.08);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Outfit', sans-serif;
+  min-height: 100vh;
+}
+
+/* Noise overlay */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.4;
+}
+
+/* Sidebar */
+#sidebar {
+  position: fixed;
+  left: 0; top: 0; bottom: 0;
+  width: 260px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.sidebar-top {
+  padding: 24px 20px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.logo {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: var(--beginner);
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+
+.sidebar-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+.sidebar-sub {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 4px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Overall progress */
+.overall-prog {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(0,0,0,0.2);
+}
+
+.prog-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.prog-label {
+  font-size: 11px;
+  color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.prog-val {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--beginner);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.prog-bar-outer {
+  height: 4px;
+  background: var(--border);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.prog-bar-inner {
+  height: 100%;
+  background: linear-gradient(90deg, var(--beginner), var(--easy));
+  border-radius: 99px;
+  transition: width 0.4s;
+}
+
+/* Nav list */
+.nav-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px 10px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-bottom: 2px;
+  position: relative;
+}
+
+.nav-item:hover { background: rgba(255,255,255,0.04); }
+.nav-item.active { background: rgba(34,197,94,0.1); }
+.nav-item.active .nav-item-name { color: var(--beginner); }
+
+.nav-item-icon { font-size: 18px; min-width: 22px; }
+
+.nav-item-info { flex: 1; min-width: 0; }
+
+.nav-item-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nav-item-count {
+  font-size: 10px;
+  color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+  margin-top: 1px;
+}
+
+.nav-done-badge {
+  font-size: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  background: rgba(34,197,94,0.15);
+  color: var(--beginner);
+  padding: 2px 7px;
+  border-radius: 99px;
+}
+
+/* Diff legend */
+.diff-legend {
+  padding: 14px 20px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.diff-dot {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.dot {
+  width: 7px; height: 7px;
+  border-radius: 99px;
+}
+
+/* Main area */
+#main {
+  margin-left: 260px;
+  min-height: 100vh;
+  position: relative;
+  z-index: 1;
+}
+
+/* Top header */
+.top-header {
+  position: sticky;
+  top: 0;
+  background: rgba(8,11,18,0.9);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 36px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  z-index: 50;
+}
+
+.topic-hero {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.topic-hero-icon { font-size: 2rem; }
+
+.topic-hero-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.topic-hero-sub {
+  font-size: 12px;
+  color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+  margin-top: 2px;
+}
+
+.filter-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  padding: 5px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border2);
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.filter-btn.all { color: var(--dim); }
+.filter-btn.all.on, .filter-btn.all:hover { border-color: var(--dim); color: var(--text); background: rgba(148,163,184,0.1); }
+.filter-btn.f-beginner { color: var(--beginner); }
+.filter-btn.f-beginner.on, .filter-btn.f-beginner:hover { border-color: var(--beginner); background: var(--beginner-bg); }
+.filter-btn.f-easy { color: var(--easy); }
+.filter-btn.f-easy.on, .filter-btn.f-easy:hover { border-color: var(--easy); background: var(--easy-bg); }
+.filter-btn.f-medium { color: var(--medium); }
+.filter-btn.f-medium.on, .filter-btn.f-medium:hover { border-color: var(--medium); background: var(--medium-bg); }
+.filter-btn.f-hard { color: var(--hard); }
+.filter-btn.f-hard.on, .filter-btn.f-hard:hover { border-color: var(--hard); background: var(--hard-bg); }
+.filter-btn.f-expert { color: var(--expert); }
+.filter-btn.f-expert.on, .filter-btn.f-expert:hover { border-color: var(--expert); background: var(--expert-bg); }
+
+/* Content area */
+.content {
+  padding: 32px 36px;
+  max-width: 900px;
+}
+
+/* Section headers */
+.diff-section {
+  margin-bottom: 36px;
+}
+
+.diff-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.diff-header-icon { font-size: 20px; }
+
+.diff-header-label {
+  font-size: 13px;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 1px;
+}
+
+.diff-header-count {
+  font-size: 11px;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--muted);
+  background: var(--border);
+  padding: 2px 8px;
+  border-radius: 99px;
+}
+
+.diff-header-line {
+  flex: 1;
+  height: 1px;
+}
+
+/* Question cards */
+.q-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  margin-bottom: 10px;
+  overflow: hidden;
+  transition: border-color 0.2s, transform 0.15s;
+}
+
+.q-card:hover {
+  transform: translateX(2px);
+}
+
+.q-card.solved {
+  border-color: rgba(34,197,94,0.3);
+  background: rgba(34,197,94,0.03);
+}
+
+.q-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px 20px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.q-index {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  min-width: 28px;
+  padding-top: 2px;
+}
+
+.q-main { flex: 1; }
+
+.q-title {
+  font-size: 0.93rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.5;
+  margin-bottom: 6px;
+}
+
+.q-desc {
+  font-size: 0.84rem;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.q-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.q-tag {
+  font-size: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid;
+}
+
+.q-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  min-width: 60px;
+}
+
+.solve-btn {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--border2);
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.solve-btn:hover { border-color: var(--beginner); background: var(--beginner-bg); }
+.solve-btn.done { border-color: var(--beginner); background: var(--beginner); color: white; }
+
+.expand-icon {
+  color: var(--muted);
+  font-size: 16px;
+  transition: transform 0.2s;
+}
+
+.q-card.open .expand-icon { transform: rotate(180deg); }
+
+/* Expanded body */
+.q-body {
+  display: none;
+  border-top: 1px solid var(--border);
+}
+
+.q-card.open .q-body { display: block; }
+
+.q-body-inner {
+  padding: 20px 20px 20px 62px;
+  display: grid;
+  gap: 16px;
+}
+
+.qb-section-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.io-box {
+  background: rgba(0,0,0,0.3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  line-height: 1.7;
+  color: #c9d1d9;
+}
+
+.io-in { color: var(--easy); }
+.io-out { color: var(--beginner); }
+
+.hint-box {
+  background: rgba(245,158,11,0.06);
+  border: 1px solid rgba(245,158,11,0.2);
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 13px;
+  color: #fbbf24;
+  line-height: 1.7;
+}
+
+.approach-box {
+  background: rgba(59,130,246,0.05);
+  border: 1px solid rgba(59,130,246,0.2);
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 13px;
+  color: #93c5fd;
+  line-height: 1.7;
+}
+
+.mark-done-btn {
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 20px;
+  border-radius: 8px;
+  border: 1px solid var(--beginner);
+  background: transparent;
+  color: var(--beginner);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mark-done-btn:hover { background: var(--beginner); color: #000; }
+.mark-done-btn.done-state { background: var(--beginner); color: #000; }
+
+/* Empty / stats */
+.stats-bar {
+  display: flex;
+  gap: 16px;
+  padding: 20px 36px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(0,0,0,0.15);
+  flex-wrap: wrap;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stat-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.3;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 99px; }
+
+/* Mobile */
+@media (max-width: 768px) {
+  #sidebar { display: none; }
+  #main { margin-left: 0; }
+  .content { padding: 20px 16px; }
+  .top-header { padding: 12px 16px; flex-direction: column; align-items: flex-start; }
+  .q-body-inner { padding: 16px; }
+}
+
+.empty-filter {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* Difficulty colors for cards */
+.q-card[data-diff="beginner"] { border-left: 3px solid var(--beginner); }
+.q-card[data-diff="easy"] { border-left: 3px solid var(--easy); }
+.q-card[data-diff="medium"] { border-left: 3px solid var(--medium); }
+.q-card[data-diff="hard"] { border-left: 3px solid var(--hard); }
+.q-card[data-diff="expert"] { border-left: 3px solid var(--expert); }
+
+.badge-beginner { color: var(--beginner); border-color: var(--beginner); background: var(--beginner-bg); }
+.badge-easy { color: var(--easy); border-color: var(--easy); background: var(--easy-bg); }
+.badge-medium { color: var(--medium); border-color: var(--medium); background: var(--medium-bg); }
+.badge-hard { color: var(--hard); border-color: var(--hard); background: var(--hard-bg); }
+.badge-expert { color: var(--expert); border-color: var(--expert); background: var(--expert-bg); }
+
+.section-beginner .diff-header-label { color: var(--beginner); }
+.section-easy .diff-header-label { color: var(--easy); }
+.section-medium .diff-header-label { color: var(--medium); }
+.section-hard .diff-header-label { color: var(--hard); }
+.section-expert .diff-header-label { color: var(--expert); }
+.section-beginner .diff-header-line { background: var(--beginner); opacity: 0.2; }
+.section-easy .diff-header-line { background: var(--easy); opacity: 0.2; }
+.section-medium .diff-header-line { background: var(--medium); opacity: 0.2; }
+.section-hard .diff-header-line { background: var(--hard); opacity: 0.2; }
+.section-expert .diff-header-line { background: var(--expert); opacity: 0.2; }
+
+.mobile-menu {
+  display: none;
+  position: fixed;
+  top: 12px; left: 12px;
+  z-index: 200;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px;
+  cursor: pointer;
+  font-size: 20px;
+}
+
+@media(max-width:768px){ .mobile-menu { display: flex; } }
+
+.toast {
+  position: fixed;
+  bottom: 20px; right: 20px;
+  background: var(--beginner);
+  color: #000;
+  font-weight: 700;
+  font-size: 13px;
+  padding: 12px 20px;
+  border-radius: 10px;
+  transform: translateY(80px);
+  opacity: 0;
+  transition: all 0.3s;
+  z-index: 9999;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+</style>
+</head>
+<body>
+
+<div id="sidebar">
+  <div class="sidebar-top">
+    <div class="logo">🐍 PYTHON</div>
+    <div class="sidebar-title">0 to Hero<br>Question Bank</div>
+    <div class="sidebar-sub" id="totalStats">Loading...</div>
+  </div>
+
+  <div class="overall-prog">
+    <div class="prog-row">
+      <span class="prog-label">OVERALL PROGRESS</span>
+      <span class="prog-val" id="overallPct">0%</span>
+    </div>
+    <div class="prog-bar-outer">
+      <div class="prog-bar-inner" id="overallBar" style="width:0%"></div>
+    </div>
+  </div>
+
+  <div class="nav-list" id="navList"></div>
+
+  <div class="diff-legend">
+    <div class="diff-dot"><div class="dot" style="background:var(--beginner)"></div>Beginner</div>
+    <div class="diff-dot"><div class="dot" style="background:var(--easy)"></div>Easy</div>
+    <div class="diff-dot"><div class="dot" style="background:var(--medium)"></div>Medium</div>
+    <div class="diff-dot"><div class="dot" style="background:var(--hard)"></div>Hard</div>
+    <div class="diff-dot"><div class="dot" style="background:var(--expert)"></div>Expert</div>
+  </div>
+</div>
+
+<div id="main">
+  <div class="stats-bar" id="statsBar"></div>
+  <div class="top-header">
+    <div class="topic-hero">
+      <div class="topic-hero-icon" id="heroIcon">📦</div>
+      <div>
+        <div class="topic-hero-name" id="heroName">Select a Topic</div>
+        <div class="topic-hero-sub" id="heroSub">— questions</div>
+      </div>
+    </div>
+    <div class="filter-row" id="filterRow">
+      <button class="filter-btn all on" onclick="setFilter('all')">ALL</button>
+      <button class="filter-btn f-beginner" onclick="setFilter('beginner')">🟢 BEGINNER</button>
+      <button class="filter-btn f-easy" onclick="setFilter('easy')">🔵 EASY</button>
+      <button class="filter-btn f-medium" onclick="setFilter('medium')">🟡 MEDIUM</button>
+      <button class="filter-btn f-hard" onclick="setFilter('hard')">🔴 HARD</button>
+      <button class="filter-btn f-expert" onclick="setFilter('expert')">⚫ EXPERT</button>
+    </div>
+  </div>
+  <div class="content" id="content"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const TOPICS = [
+  {
+    id: 0, icon: "🖨️", name: "Variables & Input/Output",
+    desc: "Foundation — storing data, printing, taking input",
+    questions: [
+      { diff:"beginner", title:"Say Hello", desc:"Print 'Hello, World!' to the screen.", io:"Output: Hello, World!", hint:"Use the print() function.", approach:"print('Hello, World!')" },
+      { diff:"beginner", title:"Print Your Name", desc:"Store your name in a variable and print: 'My name is [name]'.", io:"Output: My name is Rahul", hint:"name = 'Rahul' → print(f'My name is {name}')", approach:"Use f-string: print(f'My name is {name}')" },
+      { diff:"beginner", title:"Integer Variables", desc:"Store two numbers in variables a=10, b=3. Print their sum, difference, product, and quotient.", io:"Sum: 13 | Diff: 7 | Product: 30 | Quotient: 3.33", hint:"Use +, -, *, / operators.", approach:"print(a+b, a-b, a*b, a/b)" },
+      { diff:"beginner", title:"Type Detective", desc:"Create variables of type int, float, str, bool. Use type() to print each type.", io:"<class 'int'> <class 'float'> <class 'str'> <class 'bool'>", hint:"type(variable) returns the data type.", approach:"x=5; print(type(x)) → <class 'int'>" },
+      { diff:"beginner", title:"User Input", desc:"Ask the user to enter their name and age. Print: 'Hello [name], you are [age] years old!'", io:"Input: Priya, 21 → Hello Priya, you are 21 years old!", hint:"Use input() to get values. Remember: input() returns a string!", approach:"name=input(); age=input(); print(f'Hello {name}...')" },
+      { diff:"easy", title:"Simple Calculator", desc:"Take two numbers as input from the user. Print their sum, difference, product, and floor division.", io:"Input: 15 4 → Sum:19, Diff:11, Prod:60, Div:3", hint:"Convert input to int: a = int(input())", approach:"a=int(input()); b=int(input()); print all four operations" },
+      { diff:"easy", title:"Area of Rectangle", desc:"Take length and width as input. Calculate and print the area and perimeter of the rectangle.", io:"Input: 5 3 → Area: 15, Perimeter: 16", hint:"Area = l*w, Perimeter = 2*(l+w)", approach:"l=int(input()); w=int(input()); print(l*w, 2*(l+w))" },
+      { diff:"easy", title:"Temperature Converter", desc:"Take temperature in Celsius as input. Convert and print in Fahrenheit. Formula: F = (C × 9/5) + 32", io:"Input: 100 → Output: 212.0°F", hint:"f = (c * 9/5) + 32", approach:"c=float(input()); f=(c*9/5)+32; print(f'{f}°F')" },
+      { diff:"easy", title:"Swap Variables", desc:"Given a=5, b=10, swap their values and print both. Do it WITHOUT using a third variable.", io:"Before: a=5 b=10 | After: a=10 b=5", hint:"Python trick: a, b = b, a (tuple unpacking!)", approach:"a, b = b, a — this is the Pythonic way!" },
+      { diff:"medium", title:"Distance & Speed", desc:"A car travels distance d km in t hours. Take d and t as input. Print: speed in km/h, and time to cover 500 km at that speed.", io:"Input: 300 3 → Speed: 100km/h, 500km takes: 5.0 hours", hint:"speed = d/t; time_for_500 = 500/speed", approach:"Think: speed = distance / time, then time = distance / speed" },
+      { diff:"medium", title:"Circle Stats", desc:"Take radius r as input. Print area (πr²), circumference (2πr), diameter. Use math.pi.", io:"Input: 7 → Area:153.94, Circumference:43.98, Diameter:14", hint:"import math; area = math.pi * r * r", approach:"import math at the top. Use math.pi for π." },
+      { diff:"medium", title:"Bill Splitter", desc:"Take total bill, tax percentage, and number of people as input. Print each person's share including tax.", io:"Input: bill=1000, tax=18%, people=4 → Each pays: ₹295.0", hint:"total_with_tax = bill + (bill * tax/100); per_person = total/people", approach:"Calculate tax first, add to bill, then divide by people count." },
+    ]
+  },
+  {
+    id: 1, icon: "⚖️", name: "Operators & Math Logic",
+    desc: "Arithmetic, modulo, comparison, logical operators",
+    questions: [
+      { diff:"beginner", title:"Even or Odd", desc:"Take a number n as input. Print 'Even' if divisible by 2, else print 'Odd'.", io:"Input: 7 → Odd | Input: 4 → Even", hint:"Use the % (modulo) operator. If n % 2 == 0 → Even.", approach:"if n % 2 == 0: print('Even') else: print('Odd')" },
+      { diff:"beginner", title:"Last Digit", desc:"Given a number, extract and print its last digit.", io:"Input: 1234 → Last digit: 4", hint:"n % 10 gives the last digit!", approach:"last = n % 10" },
+      { diff:"beginner", title:"Integer Division", desc:"You have 17 chocolates to distribute among 5 children equally. How many does each get? How many are left over?", io:"Each gets: 3, Remaining: 2", hint:"Use // for integer division and % for remainder.", approach:"each = 17 // 5; remainder = 17 % 5" },
+      { diff:"easy", title:"Digit Sum", desc:"Given a 3-digit number (e.g., 357), print the sum of its digits.", io:"Input: 357 → Sum: 15 (3+5+7)", hint:"hundreds = n//100; tens = (n//10)%10; ones = n%10", approach:"Extract each digit using // and % operators, then add." },
+      { diff:"easy", title:"Power Without pow()", desc:"Calculate a^b (a raised to power b) without using pow() or **. Use a loop.", io:"Input: a=2, b=8 → Output: 256", hint:"Start result=1, multiply by 'a' exactly 'b' times in a loop.", approach:"result=1; for i in range(b): result *= a" },
+      { diff:"easy", title:"Absolute Value", desc:"Without using abs(), calculate the absolute value of a number.", io:"Input: -7 → Output: 7 | Input: 5 → Output: 5", hint:"If n < 0, multiply by -1.", approach:"if n < 0: n = -n" },
+      { diff:"easy", title:"Max of Three", desc:"Take 3 numbers as input. Print the largest WITHOUT using max().", io:"Input: 4 9 2 → Largest: 9", hint:"Compare a with b, keep the larger, then compare that with c.", approach:"largest = a; if b > largest: largest=b; if c > largest: largest=c" },
+      { diff:"medium", title:"Reverse a Number", desc:"Reverse a given number using math (no strings allowed). E.g., 12345 → 54321.", io:"Input: 12345 → Output: 54321", hint:"Extract last digit with n%10, build reversed. Remove last digit with n//10.", approach:"rev=0; while n>0: rev=rev*10 + n%10; n=n//10" },
+      { diff:"medium", title:"Palindrome Number", desc:"Check if a number is a palindrome (reads same forward and backward) using only math, no strings.", io:"Input: 121 → True | Input: 123 → False", hint:"Reverse the number using math. If reverse == original → palindrome.", approach:"Reverse the number using the loop method, compare with original." },
+      { diff:"medium", title:"Armstrong Number", desc:"A number is Armstrong if sum of its digits each raised to power (number of digits) equals the number. E.g., 153 = 1³+5³+3³", io:"Input: 153 → Armstrong ✓ | Input: 123 → Not Armstrong", hint:"Count digits first (len(str(n))). Then extract each digit and raise to that power.", approach:"ndigits = len(str(n)); sum up each_digit**ndigits; compare with n" },
+      { diff:"hard", title:"GCD Without Library", desc:"Find GCD (Greatest Common Divisor) of two numbers using Euclidean algorithm: gcd(a,b) = gcd(b, a%b).", io:"Input: 48 18 → GCD: 6", hint:"Keep replacing (a,b) with (b, a%b) until b becomes 0. Then a is GCD.", approach:"while b: a, b = b, a%b; return a" },
+      { diff:"hard", title:"LCM Using GCD", desc:"Find LCM of two numbers. Formula: LCM(a,b) = (a*b) / GCD(a,b). First implement GCD, then LCM.", io:"Input: 4 6 → LCM: 12", hint:"LCM = (a * b) // gcd(a, b)", approach:"Implement gcd first using Euclidean algorithm, then use formula." },
+      { diff:"expert", title:"Count Digits, Sum, Product", desc:"For a number n, in a SINGLE pass (one loop): count digits, find digit sum, find digit product.", io:"Input: 2345 → Count:4, Sum:14, Product:120", hint:"Loop: count+=1, total+=digit, product*=digit. All in one loop.", approach:"Use while loop extracting digits with %10 and //10 each iteration." },
+    ]
+  },
+  {
+    id: 2, icon: "🔀", name: "Conditionals (If/Else)",
+    desc: "Decision-making, nested conditions, real-world logic",
+    questions: [
+      { diff:"beginner", title:"Positive, Negative, Zero", desc:"Take a number. Print whether it is Positive, Negative, or Zero.", io:"Input: -5 → Negative | Input: 0 → Zero", hint:"Three conditions: > 0, < 0, == 0", approach:"if n>0: ... elif n<0: ... else: ..." },
+      { diff:"beginner", title:"Voting Eligibility", desc:"Take age as input. Print 'You can vote' if age >= 18, else print 'Too young to vote'.", io:"Input: 16 → Too young | Input: 20 → You can vote", hint:"Simple if-else. Check if age >= 18.", approach:"if age >= 18: print('can vote') else: print('too young')" },
+      { diff:"beginner", title:"Pass or Fail", desc:"Take marks (0-100). If marks >= 40 print 'Pass', else print 'Fail'. Also print the percentage.", io:"Input: 35 → Fail, 35% | Input: 72 → Pass, 72%", hint:"if marks >= 40: pass else: fail", approach:"if marks >= 40: print('Pass') else: print('Fail')" },
+      { diff:"easy", title:"Grade Calculator", desc:"Take marks and assign grades: A(90+), B(80-89), C(70-79), D(60-69), E(50-59), F(below 50).", io:"Input: 82 → Grade: B", hint:"Use if/elif/elif/elif/elif/else chain. Check from highest to lowest.", approach:"Start checking from >= 90 downward with elif." },
+      { diff:"easy", title:"Biggest of Three", desc:"Take 3 numbers. Print the largest using if/elif/else (not max() function).", io:"Input: 10 25 7 → Largest: 25", hint:"Check all 3 combinations: if a>b and a>c, elif b>c, else c is biggest.", approach:"Use nested conditions or compound conditions with 'and'." },
+      { diff:"easy", title:"Leap Year", desc:"Check if a year is a leap year. Rule: divisible by 4 AND (not by 100 OR divisible by 400).", io:"2000 → Leap | 1900 → Not Leap | 2024 → Leap", hint:"(year%4==0 and year%100!=0) or (year%400==0)", approach:"Combine conditions with 'and', 'or'. Test 2000, 1900, 2024." },
+      { diff:"easy", title:"Triangle Valid?", desc:"Take 3 sides as input. Check if they can form a valid triangle. Rule: sum of any two sides > third side.", io:"3 4 5 → Valid | 1 2 10 → Invalid", hint:"Check all 3 conditions: a+b>c AND b+c>a AND a+c>b", approach:"if a+b>c and b+c>a and a+c>b: Valid else: Invalid" },
+      { diff:"medium", title:"BMI Calculator", desc:"Take weight(kg) and height(m). Calculate BMI = weight/height². Categorize: Underweight<18.5, Normal 18.5-24.9, Overweight 25-29.9, Obese>=30.", io:"Input: 70kg 1.75m → BMI:22.86, Normal weight", hint:"bmi = weight / (height ** 2)", approach:"Calculate BMI first, then use if/elif chain to categorize." },
+      { diff:"medium", title:"Electricity Bill", desc:"Units used: 0-100 → ₹1.5/unit, 101-200 → ₹2.5/unit, 201-300 → ₹4/unit, >300 → ₹6/unit. Calculate bill.", io:"Input: 250 units → ₹775 (100×1.5 + 100×2.5 + 50×4)", hint:"Each slab is CUMULATIVE. First 100 always costs 100×1.5, etc.", approach:"Don't just multiply total units by one rate — use cumulative slabs!" },
+      { diff:"medium", title:"Calculator with Operation", desc:"Take two numbers and an operator (+,-,*,/,%). Perform the operation. Handle division by zero.", io:"Input: 10 / 0 → Error: Cannot divide by zero!", hint:"Use if/elif for each operator. Special case: if op=='/' and b==0.", approach:"if op=='+': ... elif op=='-': ... elif op=='/' and b!=0: ... etc" },
+      { diff:"hard", title:"Rock Paper Scissors", desc:"Take player1 and player2 moves. Print who wins or if it's a tie. Handle invalid inputs.", io:"rock vs scissors → Player 1 wins! | rock vs rock → Tie!", hint:"Map out all 9 combinations. Or find a pattern: rock beats scissors, scissors beats paper, paper beats rock.", approach:"Use nested if-else or a clever dict mapping of who beats whom." },
+      { diff:"hard", title:"Income Tax Calculator", desc:"Slabs: 0-2.5L → 0%, 2.5-5L → 5%, 5-10L → 20%, >10L → 30%. Calculate tax on given income.", io:"Input: ₹7,00,000 → Tax: ₹12,500+40,000=₹52,500", hint:"Cumulative slabs! First 2.5L is free, next 2.5L at 5%, etc.", approach:"Calculate tax for each slab separately and add them up." },
+      { diff:"expert", title:"Login System Logic", desc:"Simulate a login: user has 3 attempts. Check username='admin' password='pass123'. After 3 fails, lock account.", io:"Wrong password → 2 attempts left → Wrong → 1 left → Wrong → LOCKED", hint:"Use a while loop with a counter. Break on success.", approach:"attempts=3; while attempts>0: check creds; if wrong: attempts-=1" },
+    ]
+  },
+  {
+    id: 3, icon: "🔁", name: "Loops (for & while)",
+    desc: "Repetition, patterns, accumulation, nested loops",
+    questions: [
+      { diff:"beginner", title:"Count to N", desc:"Take N as input. Print numbers from 1 to N.", io:"Input: 5 → 1 2 3 4 5", hint:"for i in range(1, N+1): print(i)", approach:"Remember range(1, N+1) goes from 1 to N inclusive." },
+      { diff:"beginner", title:"Multiplication Table", desc:"Take a number n. Print its complete multiplication table from 1 to 10.", io:"Input: 7 → 7×1=7, 7×2=14, ... 7×10=70", hint:"for i in range(1,11): print(f'{n} x {i} = {n*i}')", approach:"Loop i from 1 to 10, multiply n×i each time." },
+      { diff:"beginner", title:"Sum 1 to N", desc:"Calculate sum of all numbers from 1 to N. Don't use formula n*(n+1)/2 — use a loop!", io:"Input: 10 → Sum: 55 | Input: 100 → Sum: 5050", hint:"total=0; for i in range(1,N+1): total += i", approach:"Accumulator pattern: keep adding to total in each iteration." },
+      { diff:"beginner", title:"Countdown", desc:"Take N as input. Print countdown from N to 1, then print 'Blast off! 🚀'", io:"Input: 5 → 5 4 3 2 1 Blast off! 🚀", hint:"for i in range(N, 0, -1): — third argument is step (negative for countdown!)", approach:"range(N, 0, -1) counts down from N to 1." },
+      { diff:"easy", title:"Factorial", desc:"Calculate n! (factorial) using a loop. E.g., 5! = 5×4×3×2×1 = 120.", io:"Input: 5 → 120 | Input: 0 → 1 (0! = 1)", hint:"result=1; for i in range(1,n+1): result *= i", approach:"Multiplication accumulator. Start from 1 since multiplying by 0 kills everything." },
+      { diff:"easy", title:"Fibonacci Series", desc:"Print first N terms of Fibonacci: 0,1,1,2,3,5,8,13... Each number is sum of two before it.", io:"Input: 8 → 0 1 1 2 3 5 8 13", hint:"Keep track of previous two numbers: a,b = 0,1; then a,b = b, a+b", approach:"a,b = 0,1; print a, then a,b = b,a+b each iteration." },
+      { diff:"easy", title:"Count Digits", desc:"Count the number of digits in a number WITHOUT converting to string. Use a loop.", io:"Input: 12345 → 5 digits | Input: 1000000 → 7 digits", hint:"Keep dividing by 10 until the number becomes 0. Count each division.", approach:"count=0; while n>0: n=n//10; count+=1" },
+      { diff:"easy", title:"Sum of Even / Odd", desc:"Take N numbers as input in a loop. Find and print the sum of all even numbers and sum of all odd numbers separately.", io:"Input: 5 numbers: 1,2,3,4,5 → Even sum:6, Odd sum:9", hint:"Inside loop: if n%2==0: even_sum+=n else: odd_sum+=n", approach:"Two accumulators: one for even, one for odd." },
+      { diff:"medium", title:"Star Triangle", desc:"Print a right-angled triangle of stars. For N=5, print 1 star in row1, 2 in row2... 5 in row5.", io:"*\n**\n***\n****\n*****", hint:"for i in range(1, N+1): print('*' * i)", approach:"Outer loop for rows, inner for stars. Or use print('*'*i)." },
+      { diff:"medium", title:"Number Pyramid", desc:"Print a number pyramid. Row 1: 1, Row 2: 1 2 1, Row 3: 1 2 3 2 1...", io:"    1\n   1 2 1\n  1 2 3 2 1\n 1 2 3 4 3 2 1", hint:"For row i: print numbers 1 to i, then i-1 down to 1. Add spaces for centering.", approach:"Two inner loops per row: ascending then descending." },
+      { diff:"medium", title:"Prime Numbers up to N", desc:"Print all prime numbers from 2 to N. For each number, check if it has any divisor other than 1 and itself.", io:"Input: 20 → 2 3 5 7 11 13 17 19", hint:"Outer loop: 2 to N. Inner loop: 2 to i-1. If any i%j==0 → not prime.", approach:"Nested loops. Use a flag 'is_prime=True', set False if divisor found." },
+      { diff:"medium", title:"Guess the Number Game", desc:"Computer picks a fixed secret number (e.g., 42). User keeps guessing until correct. Print 'Too high' / 'Too low' hints. Count attempts.", io:"Guess: 50 → Too high | Guess: 30 → Too low | Guess: 42 → Correct! 3 attempts.", hint:"while guess != secret: get input, compare, print hint. Count iterations.", approach:"Use while loop. Break when correct. Track attempt counter." },
+      { diff:"hard", title:"Pattern — Diamond", desc:"Print a diamond shape of stars for given odd N (height). Top half expands, bottom half contracts.", io:"N=5:\n  *\n ***\n*****\n ***\n  *", hint:"Top half: spaces then stars. Bottom half: reverse. Spaces = (N//2 - i) stars = 2*i+1", approach:"Top: for i in 0..N//2 — Spaces=(N//2-i), Stars=(2i+1). Bottom: reverse." },
+      { diff:"hard", title:"Sum of Series: 1 - 1/2 + 1/3 - 1/4...", desc:"Calculate sum of series up to N terms: 1 - 1/2 + 1/3 - 1/4 + ... +/- 1/N", io:"Input: 4 → 1 - 0.5 + 0.333 - 0.25 = 0.583", hint:"Use a sign variable that flips each iteration: sign = sign * -1", approach:"sign=1; total=0; for i in 1..N: total += sign/i; sign*=-1" },
+      { diff:"hard", title:"Floyd's Triangle", desc:"Print Floyd's Triangle: consecutive numbers filling rows. Row1: 1, Row2: 2 3, Row3: 4 5 6...", io:"1\n2 3\n4 5 6\n7 8 9 10", hint:"Use a single counter that keeps incrementing. Outer loop for rows, inner loop for columns.", approach:"count=1; for i in 1..N: for j in 1..i+1: print(count); count+=1" },
+      { diff:"expert", title:"Find All Pairs with Sum K", desc:"Given a list of numbers and a target K, find ALL pairs that add up to K using nested loops.", io:"nums=[1,2,3,4,5,6], K=7 → (1,6),(2,5),(3,4)", hint:"Two nested loops: outer i, inner j starting at i+1. If nums[i]+nums[j]==K, print pair.", approach:"O(n²) solution with nested loops. Later you'll solve this in O(n) with dicts!" },
+      { diff:"expert", title:"Multiplication Table Grid", desc:"Print a complete N×N multiplication table as a grid (like a times table poster).", io:"N=4:\n 1  2  3  4\n 2  4  6  8\n 3  6  9 12\n 4  8 12 16", hint:"Nested loops. print(end='\t') to print on same line. print() to move to next row.", approach:"for i in 1..N: for j in 1..N: print(i*j, end='\t'); print()" },
+    ]
+  },
+  {
+    id: 4, icon: "🔤", name: "Strings",
+    desc: "Text processing, slicing, methods — HackerRank favorite!",
+    questions: [
+      { diff:"beginner", title:"String Length", desc:"Take a string as input. Print its length WITHOUT using len().", io:"Input: 'hello' → Length: 5", hint:"Loop through the string and count each character.", approach:"count=0; for ch in s: count+=1" },
+      { diff:"beginner", title:"Count Vowels", desc:"Count the number of vowels (a,e,i,o,u — both cases) in a given string.", io:"Input: 'Hello World' → Vowels: 3", hint:"vowels='aeiouAEIOU'; for ch in s: if ch in vowels: count+=1", approach:"Membership check with 'in' operator." },
+      { diff:"beginner", title:"Reverse a String", desc:"Reverse a string WITHOUT using [::-1] or reversed(). Use a loop.", io:"Input: 'python' → 'nohtyp'", hint:"result=''; for ch in s: result = ch + result", approach:"Prepend each character to result, not append." },
+      { diff:"easy", title:"Palindrome String", desc:"Check if a string is a palindrome (ignoring spaces and case). 'A man a plan a canal Panama' is a palindrome.", io:"'racecar' → Yes | 'hello' → No", hint:"Clean: s.replace(' ','').lower(). Compare with s[::-1]", approach:"Remove spaces, lowercase, then compare with its reverse." },
+      { diff:"easy", title:"Count Words", desc:"Count the number of words in a sentence WITHOUT using split().", io:"Input: 'I love Python' → Words: 3", hint:"Count spaces + 1 (but handle multiple spaces!). Or count when you transition from space to non-space.", approach:"in_word=False; words=0; loop chars; flip in_word flag." },
+      { diff:"easy", title:"Title Case Without title()", desc:"Convert a string to title case (first letter of each word capitalized) WITHOUT using .title().", io:"Input: 'hello world from python' → 'Hello World From Python'", hint:"Split by spaces, capitalize first char of each word, rejoin.", approach:"words=s.split(); result=[w[0].upper()+w[1:] for w in words]" },
+      { diff:"easy", title:"Caesar Cipher", desc:"Shift each letter in a string by k positions in the alphabet. Non-letters remain unchanged.", io:"Input: 'hello', k=3 → 'khoor'", hint:"For each char, find its ASCII (ord()), add k, wrap with % 26, convert back (chr()).", approach:"new_ch = chr((ord(ch)-ord('a')+k)%26 + ord('a'))" },
+      { diff:"medium", title:"Anagram Check", desc:"Check if two strings are anagrams (contain same letters in different order). 'listen'/'silent' are anagrams.", io:"'listen','silent' → True | 'hello','world' → False", hint:"Sort both strings and compare. Or use character frequency counts.", approach:"sorted(s1) == sorted(s2) — or count char frequencies in a dict." },
+      { diff:"medium", title:"Most Frequent Character", desc:"Find the character that appears most often in a string (ignore spaces).", io:"Input: 'programming' → 'g' (appears 2 times)", hint:"Use a dict to count frequency of each character, then find max.", approach:"freq={}; for ch in s: freq[ch]=freq.get(ch,0)+1; find max value." },
+      { diff:"medium", title:"Remove Duplicates from String", desc:"Remove duplicate characters from a string while keeping first occurrence order.", io:"Input: 'programming' → 'progamin'", hint:"Keep a 'seen' set. Only add char to result if not in seen.", approach:"seen=set(); result=''; for ch in s: if ch not in seen: result+=ch; seen.add(ch)" },
+      { diff:"medium", title:"String Compression", desc:"Compress a string by replacing consecutive repeated characters with char+count. 'aaabbc' → 'a3b2c1'", io:"Input: 'aaabbbcccc' → 'a3b3c4'", hint:"Track current char and its count. When char changes, append old char+count.", approach:"curr=s[0]; count=1; loop from index 1; if same: count++ else: append and reset" },
+      { diff:"hard", title:"Valid Parentheses", desc:"Check if a string of brackets is valid: every open bracket has a matching close in correct order.", io:"'(){}[]' → Valid | '({)}' → Invalid | '(((' → Invalid", hint:"Use a stack (list). Push open brackets, pop and check when you see closing.", approach:"stack=[]; for ch: if open→push; if close→check top matches" },
+      { diff:"hard", title:"Longest Common Prefix", desc:"Given a list of strings, find the longest common prefix among all strings.", io:"['flower','flow','flight'] → 'fl'", hint:"Start with first string as prefix. Keep shortening it until all strings start with it.", approach:"prefix=words[0]; for word in words: while not word.startswith(prefix): prefix=prefix[:-1]" },
+      { diff:"hard", title:"Word Frequency Counter", desc:"Count frequency of each word in a sentence. Print words sorted by frequency (highest first).", io:"'the cat sat on the mat the' → the:3, cat:1, sat:1, on:1, mat:1", hint:"Split into words, use dict to count. Sort dict items by value descending.", approach:"freq={}; sorted(freq.items(), key=lambda x: -x[1])" },
+      { diff:"expert", title:"Longest Substring Without Repeating", desc:"Find the length of the longest substring without any repeating characters. Classic LeetCode problem!", io:"'abcabcbb' → 3 ('abc') | 'pwwkew' → 3 ('wke')", hint:"Sliding window: use a set and two pointers. Expand right, contract left when repeat found.", approach:"left=0; seen=set(); maxlen=0; for right in range(len(s)): while s[right] in seen: remove s[left]..." },
+    ]
+  },
+  {
+    id: 5, icon: "📋", name: "Lists & Arrays",
+    desc: "The most important data structure — sorting, searching, patterns",
+    questions: [
+      { diff:"beginner", title:"List Sum & Average", desc:"Given a list [3,7,2,9,4,6,1,8,5], find the sum and average WITHOUT using sum().", io:"Sum: 45, Average: 5.0", hint:"total=0; for n in lst: total+=n; avg=total/len(lst)", approach:"Accumulate sum in a loop, divide by count at the end." },
+      { diff:"beginner", title:"Count Occurrences", desc:"Count how many times a given element appears in a list. Don't use .count().", io:"List:[1,2,3,2,4,2,5], find 2 → Count: 3", hint:"Loop through list: if item == target: count+=1", approach:"Simple loop with equality check." },
+      { diff:"beginner", title:"Linear Search", desc:"Search for a target in a list. Return its index if found, -1 if not found.", io:"List:[5,3,8,1,9], target=8 → Found at index 2", hint:"Loop with index: for i in range(len(lst)): if lst[i]==target: return i", approach:"Use enumerate() or range(len(lst)). Return -1 at end if not found." },
+      { diff:"easy", title:"Find Min and Max", desc:"Find both minimum AND maximum in ONE loop pass. Don't use min() or max().", io:"[4,2,9,1,7,6] → Min:1, Max:9", hint:"Initialize both min_val=max_val=lst[0]. Update both in same loop.", approach:"One pass: if item<min_val: update; if item>max_val: update" },
+      { diff:"easy", title:"Reverse a List", desc:"Reverse a list WITHOUT using .reverse() or [::-1]. Do it in-place using two pointers.", io:"[1,2,3,4,5] → [5,4,3,2,1]", hint:"Two pointers: left=0, right=len-1. Swap lst[left] and lst[right], move both inward.", approach:"while left<right: swap lst[left]↔lst[right]; left++; right--" },
+      { diff:"easy", title:"Remove Duplicates", desc:"Remove all duplicates from a list while maintaining original order.", io:"[1,2,2,3,3,3,4,5,5] → [1,2,3,4,5]", hint:"seen=set(); result=[]; for item in lst: if item not in seen: result.append(item); seen.add(item)", approach:"Use a set for O(1) lookup. Append only unseen items." },
+      { diff:"easy", title:"Second Largest", desc:"Find the second largest element in a list WITHOUT sorting and in a SINGLE pass.", io:"[3,1,4,1,5,9,2,6] → Second largest: 6", hint:"Track both first and second max. When new max found, old max becomes second.", approach:"first=second=float('-inf'); for x in lst: update both carefully." },
+      { diff:"medium", title:"Bubble Sort", desc:"Implement Bubble Sort from scratch. Sort a list in ascending order.", io:"[64,34,25,12,22,11,90] → [11,12,22,25,34,64,90]", hint:"Outer loop n times. Inner loop: compare adjacent pairs, swap if out of order. Largest bubbles to end.", approach:"for i in range(n): for j in range(0,n-i-1): if lst[j]>lst[j+1]: swap" },
+      { diff:"medium", title:"Rotate List", desc:"Rotate a list by k positions to the right. [1,2,3,4,5] rotated by 2 → [4,5,1,2,3].", io:"[1,2,3,4,5], k=2 → [4,5,1,2,3]", hint:"k = k % len(lst) to handle k>length. Result = lst[-k:] + lst[:-k]", approach:"Slice: new_lst = lst[len-k:] + lst[:len-k]" },
+      { diff:"medium", title:"Two Sum", desc:"Find TWO indices in a list where the numbers add up to a target. Classic LeetCode #1!", io:"nums=[2,7,11,15], target=9 → Indices: [0,1] (2+7=9)", hint:"Nested loops: for i, for j starting at i+1. Check if nums[i]+nums[j]==target.", approach:"O(n²) with nested loops — later optimize to O(n) with dictionary!" },
+      { diff:"medium", title:"Merge Two Sorted Lists", desc:"Merge two sorted lists into one sorted list WITHOUT using sort().", io:"[1,3,5,7] + [2,4,6,8] → [1,2,3,4,5,6,7,8]", hint:"Use two pointers, one for each list. Compare and pick smaller, advance that pointer.", approach:"i=j=0; while both lists have elements: compare and append smaller." },
+      { diff:"hard", title:"Dutch National Flag", desc:"Given a list of 0s, 1s, and 2s (mixed). Sort it in ONE pass without sort(). Final: all 0s, then 1s, then 2s.", io:"[2,0,1,2,0,1,0] → [0,0,0,1,1,2,2]", hint:"Three pointers: low, mid, high. 0→swap to front, 2→swap to back, 1→just advance mid.", approach:"low=mid=0; high=n-1; while mid<=high: check lst[mid] and swap accordingly." },
+      { diff:"hard", title:"Subarray with Max Sum (Kadane's)", desc:"Find the contiguous subarray with the maximum sum. This is Kadane's Algorithm — a must-know!", io:"[-2,1,-3,4,-1,2,1,-5,4] → Max sum: 6 (subarray [4,-1,2,1])", hint:"Track current_sum and max_sum. At each step: current_sum = max(num, current_sum+num)", approach:"curr_max=global_max=lst[0]; for n in lst[1:]: curr_max=max(n,curr_max+n); global_max=max(global_max,curr_max)" },
+      { diff:"expert", title:"Find Missing Number", desc:"In a list of n-1 numbers containing 1 to n with one missing, find the missing number in O(n) time, O(1) space.", io:"n=5, list=[1,2,4,5] → Missing: 3", hint:"Expected sum = n*(n+1)/2. Actual sum = sum of list. Missing = expected - actual.", approach:"expected = n*(n+1)//2; actual=sum(lst); missing=expected-actual" },
+      { diff:"expert", title:"Product Array Except Self", desc:"For each index i, compute product of ALL elements except lst[i]. No division allowed, O(n) time.", io:"[1,2,3,4] → [24,12,8,6]", hint:"Two passes: left pass computes prefix products, right pass multiplies suffix products.", approach:"Build left_products array, then multiply by right_products in second pass." },
+    ]
+  },
+  {
+    id: 6, icon: "⚙️", name: "Functions",
+    desc: "Reusable logic, recursion, scope — build like a real developer",
+    questions: [
+      { diff:"beginner", title:"Greet Function", desc:"Write a function greet(name) that returns 'Hello, [name]! Welcome to Python.'", io:"greet('Rahul') → 'Hello, Rahul! Welcome to Python.'", hint:"def greet(name): return f'Hello, {name}! Welcome to Python.'", approach:"def + return. Call with greet('yourname')" },
+      { diff:"beginner", title:"Even or Odd Function", desc:"Write is_even(n) that returns True if n is even, False otherwise. Test with 5 different numbers.", io:"is_even(4)→True, is_even(7)→False", hint:"return n % 2 == 0", approach:"Single line return with condition." },
+      { diff:"easy", title:"Min of Two", desc:"Write min_of_two(a, b) WITHOUT using min(). Return the smaller number.", io:"min_of_two(5, 3) → 3 | min_of_two(7, 7) → 7", hint:"if a <= b: return a else: return b", approach:"Simple if-else inside function." },
+      { diff:"easy", title:"Count Vowels Function", desc:"Write count_vowels(text) that returns the number of vowels in a string. Test it on 3 different strings.", io:"count_vowels('python') → 1 | count_vowels('aeiou') → 5", hint:"vowels='aeiouAEIOU'; return sum(1 for ch in text if ch in vowels)", approach:"Use generator expression or a loop counter." },
+      { diff:"easy", title:"Calculator Functions", desc:"Write 4 functions: add(a,b), subtract(a,b), multiply(a,b), divide(a,b). divide() should handle division by zero.", io:"add(3,4)→7, divide(10,0)→'Cannot divide by zero'", hint:"For divide: if b==0: return 'Error' else: return a/b", approach:"Simple functions. Handle edge case in divide." },
+      { diff:"easy", title:"Power Function", desc:"Write power(base, exp) without using ** or pow(). Use a loop inside.", io:"power(2,10)→1024, power(3,4)→81, power(5,0)→1", hint:"result=1; for _ in range(exp): result*=base; return result", approach:"Handle exp=0 edge case (any number to power 0 = 1)." },
+      { diff:"medium", title:"Fibonacci Function", desc:"Write fib(n) that returns the nth Fibonacci number. fib(0)=0, fib(1)=1, fib(2)=1, fib(10)=55.", io:"fib(7)→13 | fib(10)→55", hint:"Use a loop with two variables: a,b=0,1; for _ in range(n): a,b=b,a+b; return a", approach:"Iterative approach with tuple unpacking." },
+      { diff:"medium", title:"Is Prime Function", desc:"Write is_prime(n) that returns True/False. Then use it to print all primes up to 100.", io:"is_prime(17)→True, is_prime(15)→False, Primes up to 50: [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47]", hint:"Check divisors from 2 to √n only (more efficient). import math; for i in range(2, int(math.sqrt(n))+1)", approach:"Check up to sqrt(n). If any divisor found → not prime." },
+      { diff:"medium", title:"Recursive Factorial", desc:"Write factorial(n) using RECURSION. Base case: factorial(0) = 1. Recursive: n * factorial(n-1).", io:"factorial(5)→120, factorial(0)→1, factorial(10)→3628800", hint:"if n==0: return 1; return n * factorial(n-1)", approach:"Two parts: base case (stops recursion) + recursive case (calls itself)." },
+      { diff:"medium", title:"Recursive Sum of List", desc:"Write sum_list(lst) recursively. Without loops, without sum().", io:"sum_list([1,2,3,4,5])→15, sum_list([])→0", hint:"Base: if lst is empty return 0. Recursive: return lst[0] + sum_list(lst[1:])", approach:"First element + sum of rest of list." },
+      { diff:"hard", title:"Memoized Fibonacci", desc:"Fibonacci with recursion is slow for large n. Add memoization (cache). Compare speed of fib(35) with and without.", io:"fib(35) without memo: slow, with memo: instant. Result: 9227465", hint:"Use a dictionary to cache results. Check cache before computing.", approach:"memo={}; if n in memo: return memo[n]; memo[n]=fib(n-1)+fib(n-2); return memo[n]" },
+      { diff:"hard", title:"Binary Search Function", desc:"Write binary_search(lst, target) on a sorted list. Should be O(log n), not O(n).", io:"binary_search([1,3,5,7,9,11,13],7) → index 3 | target=6 → -1", hint:"Maintain low,high pointers. mid=(low+high)//2. Compare with target, discard half each time.", approach:"while low<=high: mid=(low+high)//2; if lst[mid]==target: return mid; elif lst[mid]<target: low=mid+1; else: high=mid-1" },
+      { diff:"expert", title:"Recursive Tower of Hanoi", desc:"Solve Tower of Hanoi for n disks. Print each move. Base case: 1 disk, move from source to dest.", io:"n=3 → Move disk 1: A→C, Move disk 2: A→B, Move disk 1: C→B... (7 total moves)", hint:"hanoi(n,src,dest,aux): move n-1 disks to aux, move disk n to dest, move n-1 from aux to dest", approach:"It's beautiful recursion: 3 steps. Don't try to trace it — trust the recursion!" },
+    ]
+  },
+  {
+    id: 7, icon: "🗂️", name: "Dictionaries",
+    desc: "Key-value mastery — frequency counting, grouping, lookups",
+    questions: [
+      { diff:"beginner", title:"Student Record", desc:"Create a dict for a student: name, age, marks, city. Print each key-value pair using a loop.", io:"name: Rahul | age: 20 | marks: 85 | city: Mumbai", hint:"for key, value in student.items(): print(f'{key}: {value}')", approach:"Use .items() to loop through key-value pairs." },
+      { diff:"beginner", title:"Phone Book", desc:"Create a phone book dictionary with 5 contacts. Allow lookup by name. If not found, print 'Contact not found.'", io:"Search: 'Priya' → 9876543210 | Search: 'Bob' → Contact not found.", hint:"Use .get(name, 'Contact not found') for safe lookup.", approach:"phonebook.get(name, 'Contact not found') — no KeyError!" },
+      { diff:"easy", title:"Word Frequency Counter", desc:"Count frequency of each word in a sentence. Print words and their counts.", io:"'the cat sat on the mat' → {'the':2, 'cat':1, 'sat':1, 'on':1, 'mat':1}", hint:"Split sentence. For each word: freq[word] = freq.get(word, 0) + 1", approach:"Use .get(word, 0) to safely increment count without KeyError." },
+      { diff:"easy", title:"Character Frequency", desc:"Count frequency of each character (excluding spaces) in a string. Find the most common character.", io:"'programming' → {'p':1,'r':2,'o':1,'g':2,'a':1,'m':2,'i':1,'n':1} | Most common: r/g/m (all 2)", hint:"Similar to word frequency but loop over characters.", approach:"Build freq dict. Find max with max(freq, key=freq.get)" },
+      { diff:"easy", title:"Invert a Dictionary", desc:"Swap keys and values in a dictionary. Assume all values are unique.", io:"{'a':1, 'b':2, 'c':3} → {1:'a', 2:'b', 3:'c'}", hint:"inverted = {v:k for k,v in original.items()}", approach:"Loop through items, build new dict with value as key and key as value." },
+      { diff:"medium", title:"Group by First Letter", desc:"Given a list of words, group them into a dictionary where key = first letter, value = list of words.", io:"['apple','ant','ball','cat','cow','carrot'] → {'a':['apple','ant'], 'b':['ball'], 'c':['cat','cow','carrot']}", hint:"For each word: if word[0] not in dict: dict[word[0]] = []; dict[word[0]].append(word)", approach:"Check if key exists, create empty list if not, then append." },
+      { diff:"medium", title:"Two Sum with Dictionary", desc:"Find two numbers that add to target. This time, use a DICTIONARY for O(n) time. (Upgrade from the O(n²) loop version!)", io:"nums=[2,7,11,15], target=9 → indices [0,1]", hint:"For each num, check if (target-num) is in dict. If yes → found! If no → store num:index.", approach:"seen={}; for i,n in enumerate(nums): complement=target-n; if complement in seen: return [seen[complement],i]" },
+      { diff:"medium", title:"Most Common N Words", desc:"Find the top N most frequent words in a text. Return them sorted by frequency.", io:"text='the cat the mat cat sat', N=2 → ['the':2, 'cat':2]", hint:"Build frequency dict, sort by value descending, slice first N.", approach:"sorted(freq.items(), key=lambda x: x[1], reverse=True)[:N]" },
+      { diff:"hard", title:"Validate Anagram Groups", desc:"Given a list of words, group all anagrams together.", io:"['eat','tea','tan','ate','nat','bat'] → [['eat','tea','ate'],['tan','nat'],['bat']]", hint:"Key insight: two words are anagrams if their sorted characters are equal. sorted('eat')=sorted('tea')='aet'", approach:"groups={}; for word in words: key=tuple(sorted(word)); groups[key].append(word)" },
+      { diff:"hard", title:"Sparse Matrix using Dict", desc:"Represent a sparse matrix (mostly zeros) using a dictionary. Store only non-zero values. Implement add() and get().", io:"set(0,0,5), set(2,3,8) → {(0,0):5, (2,3):8}; get(1,1)→0, get(0,0)→5", hint:"Key = (row, col) tuple. get returns matrix.get((r,c), 0)", approach:"Use tuples as dict keys! matrix={}; matrix[(r,c)]=val; matrix.get((r,c),0)" },
+      { diff:"expert", title:"LRU Cache Simulation", desc:"Simulate an LRU (Least Recently Used) cache of capacity K. Implement get() and put(). Evict least recently used item when full.", io:"put(1,1), put(2,2), get(1)→1, put(3,3) → evict 2 (least recently used)", hint:"Use an OrderedDict (from collections import OrderedDict). Move accessed items to end.", approach:"Use dict + linked list concept. Access = move to front. Evict = remove from back." },
+    ]
+  },
+  {
+    id: 8, icon: "🧮", name: "Sets & Tuples",
+    desc: "Unique collections, immutability, set operations",
+    questions: [
+      { diff:"beginner", title:"Unique Elements", desc:"Given a list with duplicates, print only unique elements using a set.", io:"[1,2,2,3,3,3,4] → {1,2,3,4}", hint:"unique = set(my_list) — that's it! Sets auto-remove duplicates.", approach:"Convert list to set. Print or loop through it." },
+      { diff:"easy", title:"Set Operations", desc:"Given two sets A={1,2,3,4,5} and B={3,4,5,6,7}, find: union, intersection, difference (A-B), symmetric difference.", io:"Union:{1-7}, Intersection:{3,4,5}, A-B:{1,2}, Sym.Diff:{1,2,6,7}", hint:"A|B (union), A&B (intersection), A-B (difference), A^B (symmetric diff)", approach:"Use set operators: |, &, -, ^" },
+      { diff:"easy", title:"Common Elements (Sets)", desc:"Find common elements between two lists using sets. Much faster than nested loops!", io:"[1,2,3,4,5] and [3,4,5,6,7] → Common: {3,4,5}", hint:"set(list1) & set(list2) — intersection gives common elements", approach:"Convert both to sets, use & operator." },
+      { diff:"medium", title:"Tuple Unpacking", desc:"Create a function that returns multiple values as a tuple. Call it and unpack the result into separate variables.", io:"get_stats([1,2,3,4,5]) → returns (1, 5, 15, 3.0) | min, max, sum, avg = get_stats(lst)", hint:"return (min_val, max_val, total, avg) — Python packs these as a tuple.", approach:"Functions can return tuples! a, b, c, d = my_function()" },
+      { diff:"medium", title:"Named Tuple Record", desc:"Use namedtuple to create a Student record with fields: name, age, marks. Create 3 students and find the one with highest marks.", io:"Student(name='Priya',age=20,marks=92) → Highest marks: Priya with 92", hint:"from collections import namedtuple; Student=namedtuple('Student',['name','age','marks'])", approach:"Named tuples are like lightweight objects. Access by name: s.name, s.marks" },
+      { diff:"hard", title:"Subset Check", desc:"Check if set A is a subset of set B (all elements of A exist in B). Do it two ways: using .issubset() and manually.", io:"A={1,2,3}, B={1,2,3,4,5} → True | A={1,6}, B={1,2,3} → False", hint:"Manual: for item in A: if item not in B: return False; return True", approach:"Compare both methods. A.issubset(B) == A <= B" },
+      { diff:"hard", title:"Frozen Set as Dict Key", desc:"Group words by their unique character set using frozenset as dictionary key. Words with same letters group together.", io:"['abc','bca','cab','def','fed'] → {frozenset(abc):[abc,bca,cab], frozenset(def):[def,fed]}", hint:"frozenset('abc') == frozenset('bca') == frozenset('cab'). Use this as dict key.", approach:"groups={}; for word: key=frozenset(word); groups.setdefault(key,[]).append(word)" },
+    ]
+  },
+  {
+    id: 9, icon: "🏆", name: "Classic Interview Problems",
+    desc: "HackerRank / LeetCode style — the real test begins here!",
+    questions: [
+      { diff:"easy", title:"FizzBuzz", desc:"Print 1-100. Multiples of 3 → 'Fizz'. Multiples of 5 → 'Buzz'. Multiples of both → 'FizzBuzz'. Classic interview question!", io:"1,2,Fizz,4,Buzz,Fizz,7,8,Fizz,Buzz,11,Fizz,13,14,FizzBuzz...", hint:"Check divisible by 15 FIRST (for FizzBuzz), then 3, then 5, else print number.", approach:"if n%15==0: FizzBuzz elif n%3==0: Fizz elif n%5==0: Buzz else: n" },
+      { diff:"easy", title:"Count Duplicates", desc:"Count total number of characters in a string that appear more than once.", io:"'abcde' → 0 | 'aabbcde' → 2 | 'aabbccdd' → 4", hint:"Build frequency dict. Count how many have frequency > 1.", approach:"freq=Counter(s); return sum(1 for v in freq.values() if v>1)" },
+      { diff:"medium", title:"Balance Parentheses", desc:"Given a string with only '(' and ')', find minimum number of add/remove operations to make it balanced.", io:"'(()' → 1 | ')))' → 3 | '()()' → 0", hint:"Track open_count (unmatched opens) and close_needed. Loop: ')' with no open → close_needed++; '(' → open_count++", approach:"close_needed=open_count=0; for ch: if ')': if open>0: open-- else: close++; return open+close" },
+      { diff:"medium", title:"Spiral Matrix Print", desc:"Given an N×N matrix (list of lists), print all elements in spiral order (clockwise from outside in).", io:"[[1,2,3],[4,5,6],[7,8,9]] → 1 2 3 6 9 8 7 4 5", hint:"Four boundaries: top, bottom, left, right. Move right→down→left→up, then shrink boundaries.", approach:"Peel the matrix layer by layer. top++,bottom--,left++,right-- after each direction." },
+      { diff:"medium", title:"Valid Anagram", desc:"Given two strings s and t, return True if t is an anagram of s. O(n) solution.", io:"'anagram','nagaram' → True | 'rat','car' → False", hint:"Count character frequencies in both strings. Compare the counts.", approach:"Use Counter(s)==Counter(t) or build freq dicts manually." },
+      { diff:"medium", title:"Move Zeros to End", desc:"Move all zeros in a list to the end while maintaining relative order of non-zero elements. In-place, O(n).", io:"[0,1,0,3,12] → [1,3,12,0,0]", hint:"Use write pointer: loop through list; if non-zero, write to position write_pos, advance write_pos. Fill rest with zeros.", approach:"write=0; for n in lst: if n!=0: lst[write]=n; write++; fill lst[write:] with 0" },
+      { diff:"hard", title:"Longest Consecutive Sequence", desc:"Find the length of the longest sequence of consecutive integers in an unsorted list. O(n) expected.", io:"[100,4,200,1,3,2] → 4 (sequence: 1,2,3,4)", hint:"Convert to set. For each num, only start counting if num-1 is NOT in set (start of sequence).", approach:"s=set(lst); for n in s: if n-1 not in s: count while n,n+1,n+2... in set" },
+      { diff:"hard", title:"Stock Buy Sell Max Profit", desc:"Given daily stock prices, find max profit from ONE buy and ONE sell (buy before sell). Classic interview problem!", io:"[7,1,5,3,6,4] → Max profit: 5 (buy at 1, sell at 6)", hint:"Track min_price seen so far. At each price: profit=price-min_price. Update max_profit.", approach:"min_price=prices[0]; max_profit=0; for p in prices: update min, calc profit, update max" },
+      { diff:"hard", title:"Matrix Rotation 90°", desc:"Rotate an N×N matrix 90 degrees clockwise IN-PLACE. Don't create a new matrix.", io:"[[1,2,3],[4,5,6],[7,8,9]] → [[7,4,1],[8,5,2],[9,6,3]]", hint:"Two steps: (1) Transpose matrix (swap [i][j] with [j][i]). (2) Reverse each row.", approach:"Step1: for i in range(n): for j in range(i+1,n): swap m[i][j]↔m[j][i]. Step2: for row in m: row.reverse()" },
+      { diff:"hard", title:"Valid Sudoku Board", desc:"Check if a 9×9 Sudoku board is valid: no repeats in rows, columns, or 3×3 boxes.", io:"Valid board → True | Board with repeat in row → False", hint:"Use sets. For each row, col, and 3x3 box: add number to set. If already in set → invalid.", approach:"Check each of 9 rows, 9 cols, 9 boxes separately using sets." },
+      { diff:"expert", title:"Merge Intervals", desc:"Given a list of intervals, merge all overlapping intervals. Key interview problem!", io:"[[1,3],[2,6],[8,10],[15,18]] → [[1,6],[8,10],[15,18]]", hint:"Sort by start time. For each interval: if it overlaps with last merged (start <= last end), extend last end. Else add new.", approach:"Sort; result=[intervals[0]]; for each interval: overlap check and merge or append." },
+      { diff:"expert", title:"Trapping Rainwater", desc:"Given elevation map as list of heights, calculate total water trapped after rain. Famous interview problem!", io:"[0,1,0,2,1,0,1,3,2,1,2,1] → 6 units of water", hint:"For each position: water = min(max_left, max_right) - height. Precompute left_max and right_max arrays.", approach:"Build left_max[], right_max[]. For each i: water[i]=min(left_max[i],right_max[i])-height[i]. Sum water." },
+      { diff:"expert", title:"Longest Increasing Subsequence", desc:"Find the length of the longest strictly increasing subsequence in a list. Classic DP problem!", io:"[10,9,2,5,3,7,101,18] → 4 (subsequence: 2,3,7,101)", hint:"dp[i] = length of LIS ending at index i. For each i: check all j<i where nums[j]<nums[i]. dp[i]=max(dp[j])+1", approach:"dp=[1]*n; for i in range(n): for j in range(i): if nums[j]<nums[i]: dp[i]=max(dp[i],dp[j]+1); return max(dp)" },
+    ]
+  }
+];
+
+// State
+let currentTopic = 0;
+let activeFilter = 'all';
+let solved = {};
+
+function init() {
+  // Load solved from memory
+  renderNav();
+  loadTopic(0);
+  updateOverall();
+}
+
+function renderNav() {
+  const nav = document.getElementById('navList');
+  nav.innerHTML = TOPICS.map((t, i) => {
+    const total = t.questions.length;
+    const done = t.questions.filter((_, qi) => solved[`${i}-${qi}`]).length;
+    return `
+      <div class="nav-item ${i===currentTopic?'active':''}" onclick="loadTopic(${i})">
+        <div class="nav-item-icon">${t.icon}</div>
+        <div class="nav-item-info">
+          <div class="nav-item-name">${t.name}</div>
+          <div class="nav-item-count">${done}/${total} solved</div>
+        </div>
+        ${done===total ? '<span class="nav-done-badge">✓ Done</span>' : ''}
+      </div>
+    `;
+  });
+}
+
+function updateOverall() {
+  const total = TOPICS.reduce((s,t)=>s+t.questions.length,0);
+  const done = Object.keys(solved).filter(k=>solved[k]).length;
+  const pct = total>0 ? Math.round(done/total*100) : 0;
+  document.getElementById('overallPct').textContent = pct+'%';
+  document.getElementById('overallBar').style.width = pct+'%';
+  document.getElementById('totalStats').textContent = `${done}/${total} questions solved`;
+
+  // Stats bar
+  const diffs = ['beginner','easy','medium','hard','expert'];
+  const icons = {'beginner':'🟢','easy':'🔵','medium':'🟡','hard':'🔴','expert':'⚫'};
+  const colors = {'beginner':'var(--beginner)','easy':'var(--easy)','medium':'var(--medium)','hard':'var(--hard)','expert':'var(--expert)'};
+  let statsHTML = '';
+  diffs.forEach(d => {
+    let total_d=0, done_d=0;
+    TOPICS.forEach((t,ti) => t.questions.forEach((q,qi) => {
+      if(q.diff===d){ total_d++; if(solved[`${ti}-${qi}`]) done_d++; }
+    }));
+    statsHTML += `
+      <div class="stat-item">
+        <div class="stat-num" style="color:${colors[d]}">${done_d}</div>
+        <div class="stat-label">${icons[d]}<br>${d}</div>
+      </div>
+    `;
+  });
+  document.getElementById('statsBar').innerHTML = statsHTML;
+}
+
+function loadTopic(idx) {
+  currentTopic = idx;
+  activeFilter = 'all';
+  
+  // Update filter buttons
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('on'));
+  document.querySelector('.filter-btn.all').classList.add('on');
+
+  renderNav();
+  renderTopic();
+}
+
+function renderTopic() {
+  const t = TOPICS[currentTopic];
+  document.getElementById('heroIcon').textContent = t.icon;
+  document.getElementById('heroName').textContent = t.name;
+  document.getElementById('heroSub').textContent = `${t.questions.length} questions · ${t.desc}`;
+
+  const diffs = ['beginner','easy','medium','hard','expert'];
+  const diffLabels = {
+    beginner:'🟢 BEGINNER', easy:'🔵 EASY', medium:'🟡 MEDIUM', hard:'🔴 HARD', expert:'⚫ EXPERT / INTERVIEW'
+  };
+
+  let html = '';
+  let globalIdx = 1;
+
+  diffs.forEach(diff => {
+    const qs = t.questions.map((q,qi)=>({...q,qi})).filter(q=>q.diff===diff);
+    if(qs.length===0) return;
+    if(activeFilter !== 'all' && activeFilter !== diff) return;
+
+    html += `<div class="diff-section section-${diff}">
+      <div class="diff-header">
+        <span class="diff-header-label">${diffLabels[diff]}</span>
+        <span class="diff-header-count">${qs.length} questions</span>
+        <div class="diff-header-line"></div>
+      </div>`;
+
+    qs.forEach(q => {
+      const key = `${currentTopic}-${q.qi}`;
+      const isSolved = solved[key];
+      html += `
+        <div class="q-card ${isSolved?'solved':''}" data-diff="${diff}" id="qcard-${q.qi}">
+          <div class="q-header" onclick="toggleQ(${q.qi})">
+            <div class="q-index">#${String(globalIdx).padStart(3,'0')}</div>
+            <div class="q-main">
+              <div class="q-title">${isSolved?'<span style="color:var(--beginner)">✓</span> ':'' }${q.title}</div>
+              <div class="q-desc">${q.desc}</div>
+              <div class="q-tags">
+                <span class="q-tag badge-${diff}">${diff.toUpperCase()}</span>
+              </div>
+            </div>
+            <div class="q-right">
+              <button class="solve-btn ${isSolved?'done':''}" onclick="event.stopPropagation(); toggleSolved(${q.qi})">${isSolved?'✓':'○'}</button>
+              <span class="expand-icon">▾</span>
+            </div>
+          </div>
+          <div class="q-body">
+            <div class="q-body-inner">
+              <div>
+                <div class="qb-section-title">Example Input / Output</div>
+                <div class="io-box"><span class="io-out">${q.io}</span></div>
+              </div>
+              <div>
+                <div class="qb-section-title">💡 Hint (try without first!)</div>
+                <div class="hint-box">${q.hint}</div>
+              </div>
+              <div>
+                <div class="qb-section-title">🧠 Approach / Key Idea</div>
+                <div class="approach-box">${q.approach}</div>
+              </div>
+              <button class="mark-done-btn ${isSolved?'done-state':''}" onclick="toggleSolved(${q.qi})">
+                ${isSolved ? '✓ Marked as Solved — Click to Undo' : '○ Mark as Solved'}
+              </button>
+            </div>
+          </div>
+        </div>`;
+      globalIdx++;
+    });
+
+    html += '</div>';
+  });
+
+  if(html === '') {
+    html = `<div class="empty-filter">No questions match this filter for this topic.</div>`;
+  }
+
+  document.getElementById('content').innerHTML = html;
+}
+
+function toggleQ(qi) {
+  const card = document.getElementById(`qcard-${qi}`);
+  card.classList.toggle('open');
+}
+
+function toggleSolved(qi) {
+  const key = `${currentTopic}-${qi}`;
+  solved[key] = !solved[key];
+  const wasSolved = solved[key];
+  showToast(wasSolved ? `✅ Marked as solved! Keep going!` : `↩️ Unmarked`);
+  renderTopic();
+  renderNav();
+  updateOverall();
+  // Re-open the card
+  setTimeout(() => {
+    const card = document.getElementById(`qcard-${qi}`);
+    if(card) card.classList.add('open');
+  }, 50);
+}
+
+function setFilter(f) {
+  activeFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('on'));
+  const map = {'all':'all','beginner':'f-beginner','easy':'f-easy','medium':'f-medium','hard':'f-hard','expert':'f-expert'};
+  document.querySelector(`.filter-btn.${map[f]}`).classList.add('on');
+  renderTopic();
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+init();
+</script>
+</body>
+</html>
